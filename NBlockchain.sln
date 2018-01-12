@@ -5,7 +5,12 @@ VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Naivechain", "naivechain\Naivechain.njsproj", "{8B94B7FC-1593-4B9F-B313-855ACF5A1E43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PPrototocol", "P2PPrototocol\P2PPrototocol.csproj", "{E956B153-FDF7-465C-BC08-60371C9D6E81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P2PPrototocol", "P2PPrototocol\P2PPrototocol.csproj", "{E956B153-FDF7-465C-BC08-60371C9D6E81}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C44C0AB-3093-4EBE-92E3-078B9EE54D15}"
+	ProjectSection(SolutionItems) = preProject
+		..\documentation\GraphChain.js\main.js = ..\documentation\GraphChain.js\main.js
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
