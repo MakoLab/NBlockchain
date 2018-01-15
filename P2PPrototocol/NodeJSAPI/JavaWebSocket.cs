@@ -17,12 +17,18 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       this.peer = peer;
     }
     internal Uri url { get; set; }
+    internal Action<JavaWebSocket> onConnection { private get; set; }
     internal Action<string> onMessage { private get; set; }
     internal Action onClose { private get; set; }
     internal Action onOpen { private get; set; }
     internal Action onError { private get; set; }
     public JavaWebSocketDescription _socket { get; internal set; }
-    internal static HTTPServer Server(int p2p_port)
+    /// <summary>
+    /// Create a new server instance. 
+    /// </summary>
+    /// <param name="p2p_port">Port number to start listen</param>
+    /// <returns></returns>
+    internal static JavaWebSocket Server(int p2p_port)
     {
       throw new NotImplementedException();
     }

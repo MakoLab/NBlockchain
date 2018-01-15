@@ -31,7 +31,7 @@ namespace NBlockchain.P2PPrototocol
     private List<JavaWebSocket> sockets = new List<JavaWebSocket>();
     private void initHttpServer()
     {
-      express app = express.GetInstance();
+      Express app = new Express(http_port);
       app.use(() => bodyParser.json());
       app.get("/blocks", (req, res) => res.send(BlockchainStore.Instance().stringify()));
       app.post("/mineBlock", (req, res) =>
@@ -50,13 +50,13 @@ namespace NBlockchain.P2PPrototocol
         connectToPeers(req.body.peer);
         res.send();
       });
-      app.listen(http_port, () => log($"Listening http on port: { http_port}"));
+      app.Listen(() => log($"Listening http on port: { http_port}"));
     }
     private void initP2PServer()
     {
-      HTTPServer server = JavaWebSocket.Server(p2p_port);
+      JavaWebSocket server = JavaWebSocket.Server(p2p_port);
       server.onConnection = ws => initConnection(ws);
-      log($"listening websocket p2p port on: { +p2p_port}");
+      log($"listening websocket p2p port on: {p2p_port}");
     }
     private void initConnection(JavaWebSocket ws)
     {
