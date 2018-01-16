@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 using static NBlockchain.P2PPrototocol.Message;
@@ -11,53 +12,42 @@ namespace NBlockchain.P2PPrototocol
   /// <summary>
   /// CommunicationEngine
   /// </summary>
-  public class CommunicationEngine
+  public class CommunicationEngine : IDisposable, INetworkAgentAPI
   {
     /// <summary>
     /// Craetes instance of CommunicationEngine
     /// </summary>
     public CommunicationEngine()
     {
+      BlockchainStore.Instance().Broadcast += CommunicationEngine_Broadcast;
+      connectToPeers(initialPeers);
     }
-    // 'use strict';
-    //  FIXME_VAR_TYPE CryptoJS = require("crypto-js");
-    //  FIXME_VAR_TYPE express = require("express");
-    //  FIXME_VAR_TYPE bodyParser = require('body-parser');
-    //  FIXME_VAR_TYPE JavaWebSocket = require("ws");
 
-    private int http_port { get; set; } = 3001;
     private int p2p_port { get; set; } = 6001;
     private IPAddress[] initialPeers { get; set; } = new IPAddress[] { };
-    private List<JavaWebSocket> sockets = new List<JavaWebSocket>();
-    private void initHttpServer()
+
+    #region INetworkAgentAPI
+    /// <summary>
+    /// cockets
+    /// </summary>
+    public List<JavaWebSocket> sockets { get; private set; } = new List<JavaWebSocket>();
+    public void connectToPeers(IPAddress[] newPeers)
     {
-      Express app = new Express(http_port);
-      app.use(() => bodyParser.json());
-      app.get("/blocks", (req, res) => res.send(BlockchainStore.Instance().stringify()));
-      app.post("/mineBlock", (req, res) =>
-          {
-            Block newBlock = BlockchainStore.Instance().generateNextBlock(req.body.data);
-            broadcast(responseLatestMsg());
-            log($"block added: {newBlock.stringify()}");
-            res.send();
-          });
-      app.get("/peers", (req, res) =>
+      foreach (IPAddress peer in newPeers)
       {
-        res.send(sockets.map(s => $"{s._socket.remoteAddress}:{s._socket.remotePort}"));
-      });
-      app.post("/addPeer", (req, res) =>
-      {
-        connectToPeers(req.body.peer);
-        res.send();
-      });
-      app.Listen(() => log($"Listening http on port: { http_port}"));
+        JavaWebSocket ws = new JavaWebSocket(peer);
+        ws.onOpen = () => initConnection(ws);
+        ws.onError = () => log("connection failed");
+      }
     }
-    private void initP2PServer()
+    public void initP2PServer()
     {
       JavaWebSocket server = JavaWebSocket.Server(p2p_port);
       server.onConnection = ws => initConnection(ws);
       log($"listening websocket p2p port on: {p2p_port}");
     }
+    #endregion
+
     private void initConnection(JavaWebSocket ws)
     {
       sockets.Add(ws);
@@ -94,15 +84,6 @@ namespace NBlockchain.P2PPrototocol
         };
       ws.onClose = () => closeConnection(ws);
       ws.onError = () => closeConnection(ws);
-    }
-    private void connectToPeers(IPAddress[] newPeers)
-    {
-      foreach (IPAddress peer in newPeers)
-      {
-        JavaWebSocket ws = new JavaWebSocket(peer);
-        ws.onOpen = () => initConnection(ws);
-        ws.onError = () => log("connection failed");
-      }
     }
     private void handleBlockchainResponse(Message message)
     {
@@ -173,20 +154,28 @@ namespace NBlockchain.P2PPrototocol
       foreach (var socket in sockets)
         write(socket, message);
     }
-    /// <summary>
-    /// Run the communication machine
-    /// </summary>
-    public void Run()
+
+
+    private void CommunicationEngine_Broadcast(object sender, BlockchainStore.NewBlockEventArgs e)
     {
-      connectToPeers(initialPeers);
-      initHttpServer();
-      initP2PServer();
+      Message _newMessage = new Message()
+      {
+        type = MessageType.RESPONSE_BLOCKCHAIN,
+        data = e.Block.stringify() // JSON.stringify(getLatestBlock())
+      };
+      broadcast(_newMessage);
     }
+
     private void log(string v)
     {
       throw new NotImplementedException();
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Dispose()
+    {
+    }
   }
 
 }

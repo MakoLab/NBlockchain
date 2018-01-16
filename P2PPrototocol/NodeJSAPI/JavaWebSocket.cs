@@ -4,10 +4,10 @@ using System.Net;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
-  internal class JavaWebSocket
+  public class JavaWebSocket
   {
 
-    internal class JavaWebSocketDescription
+    public class JavaWebSocketDescription
     {
       public string remoteAddress { get; internal set; }
       public string remotePort { get; internal set; }

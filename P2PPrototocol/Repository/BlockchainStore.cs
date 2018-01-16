@@ -1,12 +1,22 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 
 namespace NBlockchain.P2PPrototocol.Repository
 {
-  internal class BlockchainStore
+  internal class BlockchainStore : IRepositoryAgentInterface
   {
 
+    internal class NewBlockEventArgs : EventArgs
+    {
+      public NewBlockEventArgs(Block newBlock)
+      {
+        Block = newBlock;
+      }
+      public Block Block { get; private set; }
+    }
+    internal event EventHandler<NewBlockEventArgs> Broadcast;
     internal static BlockchainStore Instance()
     {
       return m_Singleton;
@@ -25,6 +35,7 @@ namespace NBlockchain.P2PPrototocol.Repository
       Block previousBlock = getLatestBlock();
       Block newBlock = new Block(previousBlock, blockData);
       Add(newBlock);
+      Broadcast?.Invoke(this, new NewBlockEventArgs(newBlock));
       return newBlock;
     }
     internal bool isValidChain(List<Block> blockchainToValidate)

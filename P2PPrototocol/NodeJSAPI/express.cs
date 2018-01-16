@@ -14,7 +14,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
   internal class Express : IDisposable
   {
 
-
     public Express(int http_port)
     {
       m_PortNumber = http_port;
@@ -60,10 +59,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       private HttpListenerRequest _request;
 
     }
-    internal void use(Action parser)
-    {
-      m_ParserAction = parser;
-    }
+
     internal void get(string path, Action<Request, Response> handcallbackler)
     {
       m_HTTPServer.Prefixes.Add(string.Format(m_PrefixTemplate, m_PortNumber, path));
