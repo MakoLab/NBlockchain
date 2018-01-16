@@ -14,12 +14,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
   internal class Express : IDisposable
   {
 
-    private Action m_ParserAction;
-    private Dictionary<string, Action<Request, Response>> m_GetHandlers = new Dictionary<string, Action<Request, Response>>();
-    public Dictionary<string, Action<Request, Response>> m_PostHandlers = new Dictionary<string, Action<Request, Response>>();
-    private HttpListener m_HTTPServer;
-    private int m_PortNumber = -1;
-    private const string m_PrefixTemplate = @"http://localhost:{0}{1}/";
 
     public Express(int http_port)
     {
@@ -27,36 +21,44 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     }
     internal class Response
     {
-      private HttpListenerResponse response;
 
       public Response(HttpListenerResponse response)
       {
-        this.response = response;
+        this.m_Response = response;
       }
-
       internal void send(string[] content)
       {
-        throw new NotImplementedException();
+        send (String.Join(", ", content));
       }
       internal void send(string content)
       {
-        throw new NotImplementedException();
+        content.WriteDocumentContent(m_Response);
+        m_Response.SendChunked = false;
+        m_Response.Close();
       }
       internal void send()
       {
-        throw new NotImplementedException();
+        send(String.Empty);
       }
+      private HttpListenerResponse m_Response;
     }
     internal class Request
     {
-      private HttpListenerRequest _request;
 
       public Request(HttpListenerRequest request)
       {
         _request = request;
+        byte[] _content = new byte[request.ContentLength64];
+        body = new HTTPBody()
+        {
+          data = request.GetDocumentContent(),
+          peer = new IPAddress[] { request.RemoteEndPoint.Address }
+        };
       }
 
-      public HTTPBody body { get; internal set; }
+      public HTTPBody body { get; private set; }
+      private HttpListenerRequest _request;
+
     }
     internal void use(Action parser)
     {
@@ -97,13 +99,17 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
               break;
             }
           case "post":
-            break;
+            {
+              Action<Request, Response> _action;
+              if (m_PostHandlers.TryGetValue(_request.Url.ToString(), out _action))
+                _action(new Request(_request), new Response(_context.Response));
+              break;
+            }
           default:
             break;
         }
       }
     }
-
     /// <summary>
     /// Gets a value that indicates whether <see cref="Express"/>can be used with the current operating system.
     /// </summary>
@@ -114,7 +120,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
 
     #region IDisposable Support
     private bool disposedValue = false; // To detect redundant calls
-
     protected virtual void Dispose(bool disposing)
     {
       if (!disposedValue)
@@ -141,6 +146,15 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       // TODO: uncomment the following line if the finalizer is overridden above.
       // GC.SuppressFinalize(this);
     }
+    #endregion
+
+    #region private
+    private Action m_ParserAction;
+    private Dictionary<string, Action<Request, Response>> m_GetHandlers = new Dictionary<string, Action<Request, Response>>();
+    private Dictionary<string, Action<Request, Response>> m_PostHandlers = new Dictionary<string, Action<Request, Response>>();
+    private HttpListener m_HTTPServer;
+    private int m_PortNumber = -1;
+    private const string m_PrefixTemplate = @"http://localhost:{0}{1}/";
     #endregion
 
   }
