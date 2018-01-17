@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using NBlockchain.P2PPrototocol.Repository;
 
-namespace NBlockchain.P2PPrototocol
+namespace NBlockchain.P2PPrototocol.Network
 {
 
   internal class Message

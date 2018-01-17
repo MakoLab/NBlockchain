@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
-using static NBlockchain.P2PPrototocol.Message;
+using static NBlockchain.P2PPrototocol.Network.Message;
 
-namespace NBlockchain.P2PPrototocol
+namespace NBlockchain.P2PPrototocol.Network
 {
 
   /// <summary>
@@ -154,8 +153,7 @@ namespace NBlockchain.P2PPrototocol
       foreach (var socket in sockets)
         write(socket, message);
     }
-
-
+    
     private void CommunicationEngine_Broadcast(object sender, BlockchainStore.NewBlockEventArgs e)
     {
       Message _newMessage = new Message()
