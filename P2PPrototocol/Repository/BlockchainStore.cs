@@ -5,9 +5,13 @@ using NBlockchain.P2PPrototocol.NodeJSAPI;
 
 namespace NBlockchain.P2PPrototocol.Repository
 {
-  internal class BlockchainStore : IRepositoryAgentInterface
+  internal class BlockchainStore : IRepositoryAgentInterface, IRepositoryNetwork
   {
 
+    internal BlockchainStore()
+    {
+      blockchain.Add(getGenesisBlock());
+    }
     internal class NewBlockEventArgs : EventArgs
     {
       public NewBlockEventArgs(Block newBlock)
@@ -16,21 +20,21 @@ namespace NBlockchain.P2PPrototocol.Repository
       }
       public Block Block { get; private set; }
     }
-    internal event EventHandler<NewBlockEventArgs> Broadcast;
-    internal static BlockchainStore Instance()
-    {
-      return m_Singleton;
-    }
-    internal void Add(Block newBlock)
-    {
-      blockchain.Add(newBlock);
-    }
+    //internal static BlockchainStore Instance()
+    //{
+    //  return m_Singleton;
+    //}
     //internal void addBlock(Block newBlock)
     //{
     //  if (Block.isValidNewBlock(newBlock, getLatestBlock()))
     //    Add(newBlock);
     //}
-    internal Block generateNextBlock(string blockData)
+    #region IRepositoryAgentInterface
+    public string stringify()
+    {
+      return JSON.stringify(blockchain);
+    }
+    public Block generateNextBlock(string blockData)
     {
       Block previousBlock = getLatestBlock();
       Block newBlock = new Block(previousBlock, blockData);
@@ -38,7 +42,20 @@ namespace NBlockchain.P2PPrototocol.Repository
       Broadcast?.Invoke(this, new NewBlockEventArgs(newBlock));
       return newBlock;
     }
-    internal bool isValidChain(List<Block> blockchainToValidate)
+    #endregion
+
+    #region IRepositoryNetwork
+    public event EventHandler<NewBlockEventArgs> Broadcast;
+    public int Count { get { return blockchain.Count; } }
+    public Block getLatestBlock()
+    {
+      return blockchain[blockchain.Count - 1];
+    }
+    public void Add(Block newBlock)
+    {
+      blockchain.Add(newBlock);
+    }
+    public bool isValidChain(List<Block> blockchainToValidate)
     {
       if (blockchainToValidate[0] != getGenesisBlock())
         return false;
@@ -52,31 +69,19 @@ namespace NBlockchain.P2PPrototocol.Repository
       }
       return true;
     }
-    internal void replaceChain(List<Block> newBlocks)
+    public void replaceChain(List<Block> newBlocks)
     {
       blockchain = newBlocks;
     }
-    internal Block getLatestBlock()
-    {
-      return blockchain[blockchain.Count - 1];
-    }
-    internal string stringify()
-    {
-      return JSON.stringify(blockchain);
-    }
-    internal int Count { get { return blockchain.Count; } }
+    #endregion
 
     #region private
-    private static BlockchainStore m_Singleton { get; } = new BlockchainStore();
-    private List<Block> blockchain { get; set; } = new List<Block>();
     private static Block getGenesisBlock()
     {
       return new Block(0, "0", 1465154705, "my genesis block!!", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7");
     }
-    private BlockchainStore()
-    {
-      blockchain.Add(getGenesisBlock());
-    }
+    private static BlockchainStore m_Singleton { get; } = new BlockchainStore();
+    private List<Block> blockchain { get; set; } = new List<Block>();
     #endregion
 
   }

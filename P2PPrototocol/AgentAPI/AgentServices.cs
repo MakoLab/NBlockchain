@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
+using System;
 using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 
 namespace NBlockchain.P2PPrototocol.AgentAPI
 {
-  class AgentServices: IDisposable
+  internal class AgentServices: IDisposable
   {
     internal IRepositoryAgentInterface Repository { get; set; }
     internal INetworkAgentAPI Network { get; set; }
@@ -23,10 +22,10 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     internal void initHttpServer()
     {
       m_HttpServer = new Express(http_port);
-      m_HttpServer.get("/blocks", (req, res) => res.send(BlockchainStore.Instance().stringify()));
+      m_HttpServer.get("/blocks", (req, res) => res.send(Repository.stringify()));
       m_HttpServer.post("/mineBlock", (req, res) =>
       {
-        Block newBlock = BlockchainStore.Instance().generateNextBlock(req.body.data);
+        Block newBlock = Repository.generateNextBlock(req.body.data);
         //broadcast(responseLatestMsg());
         Log($"block added: {newBlock.stringify()}");
         res.send();

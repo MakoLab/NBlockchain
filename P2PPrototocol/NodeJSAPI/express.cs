@@ -17,6 +17,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     public Express(int http_port)
     {
       m_PortNumber = http_port;
+      m_HTTPServer = new HttpListener();
     }
     internal class Response
     {
@@ -72,7 +73,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     }
     internal void Listen(Action callback)
     {
-      m_HTTPServer = new HttpListener();
       m_HTTPServer.Start();
       System.Threading.Tasks.Task.Run(() => HhttpAsynchronousHandler(m_HTTPServer));
       callback();

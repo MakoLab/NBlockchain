@@ -1,6 +1,7 @@
 ﻿
 using System;
 using NBlockchain.P2PPrototocol.Network;
+using NBlockchain.P2PPrototocol.Repository;
 
 namespace NBlockchain.P2PPrototocol
 {
@@ -19,11 +20,15 @@ namespace NBlockchain.P2PPrototocol
     /// </summary>
     public void Run()
     {
-      Network.INetworkAgentAPI _newNetwork = new CommunicationEngine();
-      m_Agent = new AgentAPI.AgentServices(Repository.BlockchainStore.Instance(), _newNetwork, Log);
+      m_BlockchainStore = new BlockchainStore();
+      Network.INetworkAgentAPI _newNetwork = new CommunicationEngine(m_BlockchainStore);
+      m_Agent = new AgentAPI.AgentServices(m_BlockchainStore, _newNetwork, Log);
       _newNetwork.initP2PServer();
     }
+
+    private BlockchainStore m_BlockchainStore;
     private AgentAPI.AgentServices m_Agent;
+
 
   }
 }

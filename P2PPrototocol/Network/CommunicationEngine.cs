@@ -11,20 +11,21 @@ namespace NBlockchain.P2PPrototocol.Network
   /// <summary>
   /// CommunicationEngine
   /// </summary>
-  public class CommunicationEngine : IDisposable, INetworkAgentAPI
+  internal class CommunicationEngine : IDisposable, INetworkAgentAPI
   {
+
     /// <summary>
     /// Craetes instance of CommunicationEngine
     /// </summary>
-    public CommunicationEngine()
+    internal CommunicationEngine(IRepositoryNetwork repository)
     {
-      BlockchainStore.Instance().Broadcast += CommunicationEngine_Broadcast;
+      m_Repository = repository;
+      m_Repository.Broadcast += CommunicationEngine_Broadcast;
       connectToPeers(initialPeers);
     }
-
     private int p2p_port { get; set; } = 6001;
     private IPAddress[] initialPeers { get; set; } = new IPAddress[] { };
-
+    private IRepositoryNetwork m_Repository;  
     #region INetworkAgentAPI
     /// <summary>
     /// cockets
@@ -88,14 +89,14 @@ namespace NBlockchain.P2PPrototocol.Network
     {
       List<Block> receivedBlocks = message.Parse(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
       Block latestBlockReceived = receivedBlocks[receivedBlocks.Count - 1];
-      Block latestBlockHeld = BlockchainStore.Instance().getLatestBlock();
+      Block latestBlockHeld = m_Repository.getLatestBlock();
       if (latestBlockReceived.index > latestBlockHeld.index)
       {
         log($"blockchain possibly behind. We got: {latestBlockHeld.index} Peer got: {latestBlockReceived.index}");
         if (latestBlockHeld.hash == latestBlockReceived.previousHash)
         {
           log("We can append the received block to our chain");
-          BlockchainStore.Instance().Add(latestBlockReceived);
+          m_Repository.Add(latestBlockReceived);
           broadcast(responseLatestMsg());
         }
         else if (receivedBlocks.Count == 1)
@@ -114,10 +115,10 @@ namespace NBlockchain.P2PPrototocol.Network
     }
     private void replaceChain(List<Block> newBlocks)
     {
-      if (BlockchainStore.Instance().isValidChain(newBlocks) && newBlocks.Count > BlockchainStore.Instance().Count)
+      if (m_Repository.isValidChain(newBlocks) && newBlocks.Count > m_Repository.Count)
       {
         log("Received blockchain is valid. Replacing current blockchain with received blockchain");
-        BlockchainStore.Instance().replaceChain(newBlocks);
+        m_Repository.replaceChain(newBlocks);
         broadcast(responseLatestMsg());
       }
       else
@@ -136,7 +137,7 @@ namespace NBlockchain.P2PPrototocol.Network
       return new Message()
       {
         type = MessageType.RESPONSE_BLOCKCHAIN,
-        data = BlockchainStore.Instance().stringify()
+        data = m_Repository.stringify()
       };
     }
     private Message responseLatestMsg()
@@ -144,7 +145,7 @@ namespace NBlockchain.P2PPrototocol.Network
       return new Message()
       {
         type = MessageType.RESPONSE_BLOCKCHAIN,
-        data = BlockchainStore.Instance().getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
+        data = m_Repository.getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
       };
     }
     private void write(JavaWebSocket ws, Message message) { ws.send(message.stringify()); }
