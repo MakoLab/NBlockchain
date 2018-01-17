@@ -24,16 +24,16 @@ namespace NBlockchain.P2PPrototocol.Network
       connectToPeers(initialPeers);
     }
     private int p2p_port { get; set; } = 6001;
-    private IPAddress[] initialPeers { get; set; } = new IPAddress[] { };
+    private Uri[] initialPeers { get; set; } = new Uri[] { };
     private IRepositoryNetwork m_Repository;  
     #region INetworkAgentAPI
     /// <summary>
     /// cockets
     /// </summary>
     public List<JavaWebSocket> sockets { get; private set; } = new List<JavaWebSocket>();
-    public void connectToPeers(IPAddress[] newPeers)
+    public void connectToPeers(Uri[] newPeers)
     {
-      foreach (IPAddress peer in newPeers)
+      foreach (Uri peer in newPeers)
       {
         JavaWebSocket ws = new JavaWebSocket(peer);
         ws.onOpen = () => initConnection(ws);

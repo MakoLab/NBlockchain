@@ -10,8 +10,6 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
   {
     internal IRepositoryAgentInterface Repository { get; set; }
     internal INetworkAgentAPI Network { get; set; }
-    private Action<string> Log { get; }
-    private int http_port { get; set; } = 3001;
     public AgentServices(IRepositoryAgentInterface repository, INetworkAgentAPI network, Action<string> log)
     {
       this.Repository = repository;
@@ -21,7 +19,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     }
     internal void initHttpServer()
     {
-      m_HttpServer = new Express(http_port);
+      m_HttpServer = new HttpServer(http_port, this.Log);
       m_HttpServer.get("/blocks", (req, res) => res.send(Repository.stringify()));
       m_HttpServer.post("/mineBlock", (req, res) =>
       {
@@ -32,7 +30,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
       });
       m_HttpServer.get("/peers", (req, res) =>
       {
-        res.send(Network.sockets.map(s => $"{s._socket.remoteAddress}:{s._socket.remotePort}"));
+        res.send(Network.sockets.map(s => s.ToString()));
       });
       m_HttpServer.post("/addPeer", (req, res) =>
       {
@@ -45,6 +43,10 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     {
       m_HttpServer?.Dispose();
     }
-    private Express m_HttpServer = null;
+
+    private HttpServer m_HttpServer = null;
+    private Action<string> Log { get; }
+    private int http_port { get; set; } = 3001;
+
   }
 }

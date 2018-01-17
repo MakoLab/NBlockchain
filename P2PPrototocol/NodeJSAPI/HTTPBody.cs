@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Net;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
@@ -16,7 +17,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     /// <summary>
     /// IP address of the peer sending the message
     /// </summary>
-    public IPAddress[] peer { get; internal set; }
+    public Uri[] peer { get; internal set; }
   }
 
 }

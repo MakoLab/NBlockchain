@@ -10,12 +10,12 @@ namespace NBlockchain.P2PPrototocol.lUnitTest
     [TestMethod]
     public void IsSupportedTestMethod()
     {
-      Assert.IsTrue(Express.IsSupported);
+      Assert.IsTrue(HttpServer.IsSupported);
     }
     [TestMethod]
     public void ListenTestMethod()
     {
-      using (Express _eprs = new Express(3002))
+      using (HttpServer _eprs = new HttpServer(3002, (x) => { }))
       {
         bool _called = false;
         _eprs.Listen(() => _called = true);

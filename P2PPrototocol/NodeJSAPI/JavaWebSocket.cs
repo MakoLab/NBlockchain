@@ -1,18 +1,12 @@
 ﻿
 using System;
-using System.Net;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
-  public class JavaWebSocket
-  {
 
-    public class JavaWebSocketDescription
-    {
-      public string remoteAddress { get; internal set; }
-      public string remotePort { get; internal set; }
-    }
-    public JavaWebSocket(IPAddress peer)
+  internal class JavaWebSocket
+  {
+    public JavaWebSocket(Uri peer)
     {
       this.peer = peer;
     }
@@ -22,7 +16,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     internal Action onClose { private get; set; }
     internal Action onOpen { private get; set; }
     internal Action onError { private get; set; }
-    public JavaWebSocketDescription _socket { get; internal set; }
     /// <summary>
     /// Create a new server instance. 
     /// </summary>
@@ -36,7 +29,11 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     {
       throw new NotImplementedException();
     }
-    private IPAddress peer;
+    private Uri peer;
+    public override string ToString()
+    {
+      return peer.ToString();
+    }
   }
 
 }
