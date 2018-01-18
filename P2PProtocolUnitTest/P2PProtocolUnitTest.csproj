@@ -55,6 +55,7 @@
     <Compile Include="ExpressUnitTest.cs" />
     <Compile Include="AgentServicesUnitTest.cs" />
     <Compile Include="BlockchainStoreUnitTest.cs" />
+    <Compile Include="CommunicationEngineUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

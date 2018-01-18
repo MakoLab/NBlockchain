@@ -1,6 +1,6 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Net;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 using static NBlockchain.P2PPrototocol.Network.Message;
@@ -17,15 +17,22 @@ namespace NBlockchain.P2PPrototocol.Network
     /// <summary>
     /// Craetes instance of CommunicationEngine
     /// </summary>
-    internal CommunicationEngine(IRepositoryNetwork repository)
+    internal CommunicationEngine(IRepositoryNetwork repository, Action<string> log)
     {
+      Log = log;
       m_Repository = repository;
       m_Repository.Broadcast += CommunicationEngine_Broadcast;
       connectToPeers(initialPeers);
+      Log("CommunicationEngine has been started");
     }
-    private int p2p_port { get; set; } = 6001;
-    private Uri[] initialPeers { get; set; } = new Uri[] { };
-    private IRepositoryNetwork m_Repository;  
+
+    public void initP2PServer()
+    {
+      JavaWebSocket server = JavaWebSocket.Server(p2p_port);
+      server.onConnection = () => initConnection(server);
+      Log($"listening websocket p2p port on: {p2p_port}");
+    }
+
     #region INetworkAgentAPI
     /// <summary>
     /// cockets
@@ -37,14 +44,8 @@ namespace NBlockchain.P2PPrototocol.Network
       {
         JavaWebSocket ws = new JavaWebSocket(peer);
         ws.onOpen = () => initConnection(ws);
-        ws.onError = () => log("connection failed");
+        ws.onError = () => Log("connection failed");
       }
-    }
-    public void initP2PServer()
-    {
-      JavaWebSocket server = JavaWebSocket.Server(p2p_port);
-      server.onConnection = ws => initConnection(ws);
-      log($"listening websocket p2p port on: {p2p_port}");
     }
     #endregion
 
@@ -60,7 +61,7 @@ namespace NBlockchain.P2PPrototocol.Network
       ws.onMessage = (data) =>
       {
         Message message = Message.parse(data);
-        log($"Received message { message.stringify()}");
+        Log($"Received message { message.stringify()}");
         switch (message.type)
         {
           case MessageType.QUERY_LATEST:
@@ -77,13 +78,13 @@ namespace NBlockchain.P2PPrototocol.Network
     }
     private void initErrorHandler(JavaWebSocket ws)
     {
-      Action<JavaWebSocket> closeConnection = (_ws) =>
-        {
-          log($"connection failed to peer: {_ws.url}");
-          sockets.splice(sockets.IndexOf(ws), 1);
-        };
       ws.onClose = () => closeConnection(ws);
       ws.onError = () => closeConnection(ws);
+    }
+    private void closeConnection(JavaWebSocket _ws)
+    {
+      Log($"connection failed to peer: {_ws.url}");
+      sockets.Remove(_ws);
     }
     private void handleBlockchainResponse(Message message)
     {
@@ -92,37 +93,37 @@ namespace NBlockchain.P2PPrototocol.Network
       Block latestBlockHeld = m_Repository.getLatestBlock();
       if (latestBlockReceived.index > latestBlockHeld.index)
       {
-        log($"blockchain possibly behind. We got: {latestBlockHeld.index} Peer got: {latestBlockReceived.index}");
+        Log($"blockchain possibly behind. We got: {latestBlockHeld.index} Peer got: {latestBlockReceived.index}");
         if (latestBlockHeld.hash == latestBlockReceived.previousHash)
         {
-          log("We can append the received block to our chain");
+          Log("We can append the received block to our chain");
           m_Repository.Add(latestBlockReceived);
           broadcast(responseLatestMsg());
         }
         else if (receivedBlocks.Count == 1)
         {
-          log("We have to query the chain from our peer");
+          Log("We have to query the chain from our peer");
           broadcast(queryAllMsg());
         }
         else
         {
-          log("Received blockchain is longer than current blockchain");
+          Log("Received blockchain is longer than current blockchain");
           replaceChain(receivedBlocks);
         }
       }
       else
-        log("received blockchain is not longer than received blockchain. Do nothing");
+        Log("received blockchain is not longer than received blockchain. Do nothing");
     }
     private void replaceChain(List<Block> newBlocks)
     {
       if (m_Repository.isValidChain(newBlocks) && newBlocks.Count > m_Repository.Count)
       {
-        log("Received blockchain is valid. Replacing current blockchain with received blockchain");
+        Log("Received blockchain is valid. Replacing current blockchain with received blockchain");
         m_Repository.replaceChain(newBlocks);
         broadcast(responseLatestMsg());
       }
       else
-        log("Received blockchain invalid");
+        Log("Received blockchain invalid");
     }
     private Message queryChainLengthMsg()
     {
@@ -154,7 +155,6 @@ namespace NBlockchain.P2PPrototocol.Network
       foreach (var socket in sockets)
         write(socket, message);
     }
-    
     private void CommunicationEngine_Broadcast(object sender, BlockchainStore.NewBlockEventArgs e)
     {
       Message _newMessage = new Message()
@@ -164,17 +164,17 @@ namespace NBlockchain.P2PPrototocol.Network
       };
       broadcast(_newMessage);
     }
+    private Action<string> Log { get; }
+    private int p2p_port { get; set; } = 6001;
+    private Uri[] initialPeers { get; set; } = new Uri[] { };
+    private IRepositoryNetwork m_Repository;
 
-    private void log(string v)
-    {
-      throw new NotImplementedException();
-    }
+    #region IDisposable
     /// <summary>
-    /// 
+    /// <see cref="IDisposable"/> implementation
     /// </summary>
-    public void Dispose()
-    {
-    }
+    public void Dispose() { }
+    #endregion
   }
 
 }

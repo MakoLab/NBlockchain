@@ -1,5 +1,6 @@
 ﻿
 using System;
+using NBlockchain.P2PPrototocol.AgentAPI;
 using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.Repository;
 
@@ -10,10 +11,18 @@ namespace NBlockchain.P2PPrototocol
   /// </summary>
   public class Bootstrap : IDisposable
   {
+
+    #region MyRegion
+    /// <summary>
+    /// Dispose
+    /// </summary>
     public void Dispose()
     {
       m_Agent.Dispose();
+      m_CommunicationEngine.Dispose();
     }
+    #endregion
+
     internal Action<string> Log { get; set; } = message => { };
     /// <summary>
     /// Run the communication machine
@@ -21,13 +30,14 @@ namespace NBlockchain.P2PPrototocol
     public void Run()
     {
       m_BlockchainStore = new BlockchainStore();
-      Network.INetworkAgentAPI _newNetwork = new CommunicationEngine(m_BlockchainStore);
-      m_Agent = new AgentAPI.AgentServices(m_BlockchainStore, _newNetwork, Log);
-      _newNetwork.initP2PServer();
+      m_CommunicationEngine = new CommunicationEngine(m_BlockchainStore, Log);
+      m_Agent = new AgentAPI.AgentServices(m_BlockchainStore, m_CommunicationEngine, Log);
+      m_CommunicationEngine.initP2PServer();
     }
 
     private BlockchainStore m_BlockchainStore;
-    private AgentAPI.AgentServices m_Agent;
+    private AgentServices m_Agent;
+    private CommunicationEngine m_CommunicationEngine;
 
 
   }
