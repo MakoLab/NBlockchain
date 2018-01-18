@@ -14,6 +14,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
   [TestClass]
   public class JavaWebSocketUnitTest
   {
+
     [TestMethod]
     public void ConstructorTestMethod()
     {
@@ -25,14 +26,16 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
     [TestMethod]
     public void ClientTestMethod()
     {
-      Task _server = RunServer();
+      Uri _serverURI = new Uri("http://localhost:8000/ws/");
+      Uri _clientURI = new Uri("ws://localhost:8000/ws/");
+      Task _server = RunServer(_serverURI);
       Thread.Sleep(200);
       if (_server.IsFaulted)
         throw _server.Exception;
       Assert.IsFalse(_server.IsCompleted);
       Assert.IsFalse(_server.IsFaulted);
       Assert.AreEqual<TaskStatus>(TaskStatus.WaitingForActivation, _server.Status);
-      JavaWebSocket _newJavaWebSocket = new JavaWebSocket(m_clientURI);
+      JavaWebSocket _newJavaWebSocket = new JavaWebSocket(_clientURI);
       bool _onConnection = false;
       bool _onError = false;
       bool _onOpen = false;
@@ -53,7 +56,57 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       Assert.IsFalse(_onConnection);
       Assert.IsFalse(_onError);
     }
-    private static async Task RunServer()
+    [TestMethod]
+    public void ServerTestMethod()
+    {
+      int _port = 8001;
+      Uri m_clientURI = new Uri($"ws://localhost:{_port}/ws/");
+      JavaWebSocket _socket = JavaWebSocket.Server(_port);
+      Assert.IsNotNull(_socket);
+      bool _onClose = false;
+      _socket.onClose = () => _onClose = true;
+      bool _onConnection = false;
+      _socket.onConnection = () => _onConnection = true;
+      bool _onError = false;
+      _socket.onError = () => _onError = true;
+      string _onMessage = "";
+      _socket.onMessage = message => _onMessage = message;
+      bool _onOpen = false;
+      _socket.onOpen = () => _onOpen = true;
+      Thread.Sleep(200);
+      Assert.IsFalse(_onOpen);
+      Assert.IsFalse(_onConnection);
+      Assert.IsFalse(_onError);
+      Assert.IsFalse(_onClose);
+      ClientWebSocket m_ClientWebSocket = new ClientWebSocket();
+      Task _connectTask = m_ClientWebSocket.ConnectAsync(m_clientURI, CancellationToken.None);
+      _connectTask.Wait();
+      Assert.AreEqual<WebSocketState>(WebSocketState.Open, m_ClientWebSocket.State);
+      Assert.IsFalse(_onError);
+      Assert.IsFalse(_onOpen);
+      Assert.IsTrue(_onConnection);
+      Assert.IsFalse(_onClose);
+      string time = "Test";
+      byte[] buffer = Encoding.UTF8.GetBytes(time);
+      ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+      m_ClientWebSocket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None).Wait();
+      Thread.Sleep(200);
+      Assert.IsTrue(_onConnection);
+      Assert.IsFalse(_onOpen);
+      Assert.IsFalse(_onError);
+      Assert.IsFalse(_onClose);
+      Assert.AreEqual<string>("Test", _onMessage);
+      m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.Empty, String.Empty, CancellationToken.None).Wait();
+      Assert.IsTrue(_onConnection);
+      Assert.IsFalse(_onOpen);
+      Assert.IsFalse(_onError);
+      Assert.IsTrue(_onClose);
+      Assert.AreEqual<string>("Test", _onMessage);
+
+    }
+
+    #region instrumentation
+    private static async Task RunServer(Uri m_serverURI)
     {
       HttpListener _server = new HttpListener();
       _server.Prefixes.Add(m_serverURI.ToString());
@@ -78,8 +131,6 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       }
       await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Done", CancellationToken.None);
     }
-    private static Uri m_serverURI = new Uri("http://localhost:8000/ws/");
-    private static Uri m_clientURI = new Uri("ws://localhost:8000/ws/");
-
+    #endregion
   }
 }

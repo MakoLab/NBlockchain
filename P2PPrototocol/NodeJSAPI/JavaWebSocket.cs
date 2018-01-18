@@ -38,6 +38,11 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
         default:
           break;
       }
+      m_Task = ClientMessageLoop();
+    }
+
+    private async Task ClientMessageLoop()
+    {
       byte[] buffer = new byte[1024];
       while (true)
       {
@@ -70,35 +75,65 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     {
       Uri _uri = new Uri($@"http://localhost:{p2p_port}/");
       JavaWebSocket _socket = new JavaWebSocket(_uri);
-      _socket.m_Task = _socket.ServerLoop();
+      Task.Factory.StartNew(() => _socket.ServerLoop());
       return _socket;
     }
-    private async Task ServerLoop()
+    private void ServerLoop()
     {
-      HttpListener _server = new HttpListener();
-      _server.Prefixes.Add(peer.ToString());
-      _server.Start();
-      HttpListenerContext _hc = await _server.GetContextAsync();
-      if (!_hc.Request.IsWebSocketRequest)
+      try
       {
-        _hc.Response.StatusCode = 400;
-        _hc.Response.Close();
-        return;
+        HttpListener _server = new HttpListener();
+        _server.Prefixes.Add(peer.ToString());
+        _server.Start();
+        while (true)
+        {
+          HttpListenerContext _hc = _server.GetContextAsync().Result;
+          if (!_hc.Request.IsWebSocketRequest)
+          {
+            _hc.Response.StatusCode = 400;
+            _hc.Response.Close();
+          }
+          HttpListenerWebSocketContext _context = _hc.AcceptWebSocketAsync(null).Result;
+          Task.Factory.StartNew(() => ServerMessageLoop(_context));
+        }
       }
-      Task<HttpListenerWebSocketContext> task = _hc.AcceptWebSocketAsync(null);
-      task.Wait();
-      WebSocket ws = task.Result.WebSocket;
-      for (int i = 0; i != 10; ++i)
+      catch (Exception _ex)
       {
-        // await Task.Delay(20);
-        string time = DateTime.Now.ToLongTimeString();
-        byte[] buffer = Encoding.UTF8.GetBytes(time);
-        ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
-        await ws.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
+        onError?.Invoke();
       }
-      await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Done", CancellationToken.None);
     }
-
+    private void ServerMessageLoop(HttpListenerWebSocketContext context)
+    {
+      WebSocket ws = context.WebSocket;
+      onConnection?.Invoke();
+      byte[] buffer = new byte[1024];
+      while (true)
+      {
+        ArraySegment<byte> _segments = new ArraySegment<byte>(buffer);
+        WebSocketReceiveResult _receiveResult = ws.ReceiveAsync(_segments, CancellationToken.None).Result;
+        if (_receiveResult.MessageType == WebSocketMessageType.Close)
+        {
+          onClose?.Invoke();
+          ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None);
+          return;
+        }
+        int count = _receiveResult.Count;
+        while (!_receiveResult.EndOfMessage)
+        {
+          if (count >= buffer.Length)
+          {
+            onClose?.Invoke();
+            ws.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long", CancellationToken.None);
+            return;
+          }
+          _segments = new ArraySegment<byte>(buffer, count, buffer.Length - count);
+          _receiveResult = ws.ReceiveAsync(_segments, CancellationToken.None).Result;
+          count += _receiveResult.Count;
+        }
+        string _message = Encoding.UTF8.GetString(buffer, 0, count);
+        onMessage?.Invoke(_message);
+      }
+    }
     private Task m_Task;
 
     internal Uri url { get; set; }
@@ -107,11 +142,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     internal Action onClose { private get; set; }
     internal Action onOpen { private get; set; }
     internal Action onError { private get; set; }
-    /// <summary>
-    /// Create a new server instance. 
-    /// </summary>
-    /// <param name="p2p_port">Port number to start listen</param>
-    /// <returns></returns>
     internal void send(string message)
     {
       throw new NotImplementedException();
