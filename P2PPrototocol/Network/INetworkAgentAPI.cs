@@ -8,7 +8,7 @@ namespace NBlockchain.P2PPrototocol.Network
 
   internal interface INetworkAgentAPI
   {
-    List<JavaWebSocket> sockets { get; }
+    List<WebSocketClient> sockets { get; }
     void connectToPeers(Uri[] peer);
 
   }

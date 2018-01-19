@@ -50,17 +50,17 @@ namespace NBlockchain.P2PPrototocol.lUnitTest
   }
   internal class NetworkAgent : INetworkAgentAPI
   {
-    public List<JavaWebSocket> sockets { get; } = new List<JavaWebSocket>() { { new JavaWebSocket(new Uri("http://localhost:3001")) } };
+    public List<WebSocketClient> sockets => new List<WebSocketClient>();
 
     public void connectToPeers(Uri[] peer)
     {
       throw new NotImplementedException();
     }
-
     public void initP2PServer()
     {
       throw new NotImplementedException();
     }
+
   }
 
   internal class TestRepository : IRepositoryAgentInterface

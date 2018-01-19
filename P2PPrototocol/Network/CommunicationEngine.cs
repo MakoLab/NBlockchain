@@ -28,8 +28,8 @@ namespace NBlockchain.P2PPrototocol.Network
 
     public void initP2PServer()
     {
-      JavaWebSocket server = JavaWebSocket.Server(p2p_port);
-      server.onConnection = () => initConnection(server);
+      WebSocketServer server = WebSocketServer.Server(p2p_port);
+      server.onConnection = client => initConnection(client);
       Log($"listening websocket p2p port on: {p2p_port}");
     }
 
@@ -37,26 +37,26 @@ namespace NBlockchain.P2PPrototocol.Network
     /// <summary>
     /// cockets
     /// </summary>
-    public List<JavaWebSocket> sockets { get; private set; } = new List<JavaWebSocket>();
+    public List<WebSocketClient> sockets { get; private set; } = new List<WebSocketClient>();
     public void connectToPeers(Uri[] newPeers)
     {
       foreach (Uri peer in newPeers)
       {
-        JavaWebSocket ws = new JavaWebSocket(peer);
+        WebSocketClient ws = new WebSocketClient(peer);
         ws.onOpen = () => initConnection(ws);
         ws.onError = () => Log("connection failed");
       }
     }
     #endregion
 
-    private void initConnection(JavaWebSocket ws)
+    private void initConnection(WebSocketClient ws)
     {
       sockets.Add(ws);
       initMessageHandler(ws);
       initErrorHandler(ws);
       write(ws, queryChainLengthMsg());
     }
-    private void initMessageHandler(JavaWebSocket ws)
+    private void initMessageHandler(WebSocketClient ws)
     {
       ws.onMessage = (data) =>
       {
@@ -76,12 +76,12 @@ namespace NBlockchain.P2PPrototocol.Network
         };
       };
     }
-    private void initErrorHandler(JavaWebSocket ws)
+    private void initErrorHandler(WebSocketClient ws)
     {
       ws.onClose = () => closeConnection(ws);
       ws.onError = () => closeConnection(ws);
     }
-    private void closeConnection(JavaWebSocket _ws)
+    private void closeConnection(WebSocketClient _ws)
     {
       Log($"connection failed to peer: {_ws.url}");
       sockets.Remove(_ws);
@@ -149,7 +149,7 @@ namespace NBlockchain.P2PPrototocol.Network
         data = m_Repository.getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
       };
     }
-    private void write(JavaWebSocket ws, Message message) { ws.send(message.stringify()); }
+    private void write(WebSocketClient ws, Message message) { ws.send(message.stringify()); }
     private void broadcast(Message message)
     {
       foreach (var socket in sockets)

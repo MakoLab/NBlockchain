@@ -16,9 +16,9 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
   {
 
     [TestMethod]
-    public void ConstructorTestMethod()
+    public void ClientConstructorTestMethod()
     {
-      JavaWebSocket _new = new JavaWebSocket(new Uri("http://localhost:3001"));
+      WebSocketClient _new = new WebSocketClient(new Uri("http://localhost:3001"));
       string _description = _new.ToString();
       Assert.IsFalse(String.IsNullOrEmpty(_description));
       Assert.AreEqual<string>("http://localhost:3001/", _description);
@@ -35,13 +35,12 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       Assert.IsFalse(_server.IsCompleted);
       Assert.IsFalse(_server.IsFaulted);
       Assert.AreEqual<TaskStatus>(TaskStatus.WaitingForActivation, _server.Status);
-      JavaWebSocket _newJavaWebSocket = new JavaWebSocket(_clientURI);
+      WebSocketClient _newJavaWebSocket = new WebSocketClient(_clientURI);
       bool _onConnection = false;
       bool _onError = false;
       bool _onOpen = false;
       List<string> _messages = new List<string>();
       _newJavaWebSocket.onOpen = () => _onOpen = true;
-      _newJavaWebSocket.onConnection = () => _onConnection = true;
       _newJavaWebSocket.onError = () => _onError = true;
       _newJavaWebSocket.onMessage = x => _messages.Add(x);
       Task _ClientLoop = _newJavaWebSocket.Connect();
@@ -61,18 +60,18 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
     {
       int _port = 8001;
       Uri m_clientURI = new Uri($"ws://localhost:{_port}/ws/");
-      JavaWebSocket _socket = JavaWebSocket.Server(_port);
+      WebSocketServer _socket = WebSocketServer.Server(_port);
       Assert.IsNotNull(_socket);
       bool _onClose = false;
       _socket.onClose = () => _onClose = true;
       bool _onConnection = false;
-      _socket.onConnection = () => _onConnection = true;
+      string _reportedUri = String.Empty;
+      _socket.onConnection = client => { _reportedUri = client.ToString(); _onConnection = true; };
       bool _onError = false;
       _socket.onError = () => _onError = true;
       string _onMessage = "";
       _socket.onMessage = message => _onMessage = message;
       bool _onOpen = false;
-      _socket.onOpen = () => _onOpen = true;
       Thread.Sleep(200);
       Assert.IsFalse(_onOpen);
       Assert.IsFalse(_onConnection);

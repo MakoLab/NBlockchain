@@ -6,10 +6,10 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
   internal static class NodeJSAPIExtension
   {
-    internal static string[] map(this List<JavaWebSocket> list, Func<JavaWebSocket, string> function)
+    internal static string[] map(this List<WebSocketClient> list, Func<WebSocketClient, string> function)
     {
       List<string> _ret = new List<string>();
-      foreach (JavaWebSocket _socket in list)
+      foreach (WebSocketClient _socket in list)
         _ret.Add(function(_socket));
       return _ret.ToArray();
     }
