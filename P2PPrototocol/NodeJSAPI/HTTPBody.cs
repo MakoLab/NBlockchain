@@ -1,6 +1,5 @@
 ﻿
 using System;
-using System.Net;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {

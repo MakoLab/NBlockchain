@@ -6,6 +6,7 @@ using System.Net;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
+
   /// <summary>
   /// It is C# wrapper for Java script Express wrapper. It provides HTTP server functionality.
   /// </summary>
@@ -15,14 +16,16 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
   internal class HttpServer : IDisposable
   {
 
+    #region composition
+    internal Action<string> Log { get; set; }
+    #endregion
+
     internal HttpServer(int httpPort, Action<string> log)
     {
       m_PortNumber = httpPort;
       m_HTTPServer = new HttpListener();
       this.Log = log;
     }
-    internal Action<string> Log { get; set; }
-
     internal class Response
     {
 
@@ -39,7 +42,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
         m_Response.StatusCode = (int)HttpStatusCode.Accepted;
         m_Response.SendChunked = false;
         m_Response.ContentEncoding = System.Text.Encoding.UTF8;
-        if (! String.IsNullOrEmpty(content))
+        if (!String.IsNullOrEmpty(content))
           m_Response.ContentLength64 = 0;
         else
         {
@@ -63,8 +66,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
 
       public Request(HttpListenerRequest request)
       {
-        _request = request;
-        byte[] _content = new byte[request.ContentLength64];
+
         body = new HTTPBody()
         {
           data = request.GetDocumentContent(),
@@ -73,8 +75,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       }
 
       public HTTPBody body { get; private set; }
-
-      private HttpListenerRequest _request;
 
     }
 
@@ -93,40 +93,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       m_HTTPServer.Start();
       System.Threading.Tasks.Task.Run(() => HhttpAsynchronousHandler(m_HTTPServer));
       callback();
-    }
-    private void HhttpAsynchronousHandler(HttpListener m_HTTPServer)
-    {
-      while (true)
-      {
-        if (!IsSupported)
-          break;
-        HttpListenerContext _context = m_HTTPServer.GetContext();
-        HttpListenerRequest _request = _context.Request;
-        switch (_request.HttpMethod.ToLower())
-        {
-          case "get":
-            {
-              Action<Request, Response> _action;
-              if (m_GetHandlers.TryGetValue(_request.Url.LocalPath, out _action))
-              {
-                Log($"Calling action for {_request.Url.LocalPath}");
-                _action(new Request(_request), new Response(_context.Response));
-              }
-              else
-                Log($"Skiped action for {_request.Url.LocalPath}");
-              break;
-            }
-          case "post":
-            {
-              Action<Request, Response> _action;
-              if (m_PostHandlers.TryGetValue(_request.Url.ToString(), out _action))
-                _action(new Request(_request), new Response(_context.Response));
-              break;
-            }
-          default:
-            break;
-        }
-      }
     }
     /// <summary>
     /// Gets a value that indicates whether <see cref="HttpServer"/>can be used with the current operating system.
@@ -167,12 +133,45 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     #endregion
 
     #region private
-    private Action m_ParserAction;
     private Dictionary<string, Action<Request, Response>> m_GetHandlers = new Dictionary<string, Action<Request, Response>>();
     private Dictionary<string, Action<Request, Response>> m_PostHandlers = new Dictionary<string, Action<Request, Response>>();
     private HttpListener m_HTTPServer;
     private int m_PortNumber = -1;
     private const string m_PrefixTemplate = @"http://localhost:{0}{1}/";
+    private void HhttpAsynchronousHandler(HttpListener m_HTTPServer)
+    {
+      while (true)
+      {
+        if (!IsSupported)
+          break;
+        HttpListenerContext _context = m_HTTPServer.GetContext();
+        HttpListenerRequest _request = _context.Request;
+        switch (_request.HttpMethod.ToLower())
+        {
+          case "get":
+            {
+              Action<Request, Response> _action;
+              if (m_GetHandlers.TryGetValue(_request.Url.LocalPath, out _action))
+              {
+                Log($"Calling action for {_request.Url.LocalPath}");
+                _action(new Request(_request), new Response(_context.Response));
+              }
+              else
+                Log($"Skiped action for {_request.Url.LocalPath}");
+              break;
+            }
+          case "post":
+            {
+              Action<Request, Response> _action;
+              if (m_PostHandlers.TryGetValue(_request.Url.ToString(), out _action))
+                _action(new Request(_request), new Response(_context.Response));
+              break;
+            }
+          default:
+            break;
+        }
+      }
+    }
     #endregion
 
   }

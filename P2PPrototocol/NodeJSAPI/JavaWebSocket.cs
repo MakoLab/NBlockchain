@@ -8,14 +8,13 @@ using System.Threading.Tasks;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
-
   internal class JavaWebSocket
   {
-    public JavaWebSocket(Uri peer)
+
+    internal JavaWebSocket(Uri peer)
     {
       this.peer = peer;
     }
-
     internal async Task Connect()
     {
       m_ClientWebSocket = new ClientWebSocket();
@@ -40,7 +39,33 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       }
       m_Task = ClientMessageLoop();
     }
+    internal static JavaWebSocket Server(int p2p_port)
+    {
+      Uri _uri = new Uri($@"http://localhost:{p2p_port}/");
+      JavaWebSocket _socket = new JavaWebSocket(_uri);
+      Task.Factory.StartNew(() => _socket.ServerLoop());
+      return _socket;
+    }
 
+    internal Uri url { get; set; }
+    internal Action onConnection { private get; set; } //TODO move to the sever
+    internal Action<string> onMessage { private get; set; }
+    internal Action onClose { private get; set; }
+    internal Action onOpen { private get; set; }
+    internal Action onError { private get; set; }
+    internal void send(string message)
+    {
+      throw new NotImplementedException();
+    }
+
+    #region Object
+    public override string ToString()
+    {
+      return peer.ToString();
+    }
+    #endregion
+
+    #region private
     private async Task ClientMessageLoop()
     {
       byte[] buffer = new byte[1024];
@@ -70,13 +95,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
         string _message = Encoding.UTF8.GetString(buffer, 0, count);
         onMessage?.Invoke(_message);
       }
-    }
-    internal static JavaWebSocket Server(int p2p_port)
-    {
-      Uri _uri = new Uri($@"http://localhost:{p2p_port}/");
-      JavaWebSocket _socket = new JavaWebSocket(_uri);
-      Task.Factory.StartNew(() => _socket.ServerLoop());
-      return _socket;
     }
     private void ServerLoop()
     {
@@ -135,26 +153,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       }
     }
     private Task m_Task;
-
-    internal Uri url { get; set; }
-    internal Action onConnection { private get; set; } //TODO move to the sever
-    internal Action<string> onMessage { private get; set; }
-    internal Action onClose { private get; set; }
-    internal Action onOpen { private get; set; }
-    internal Action onError { private get; set; }
-    internal void send(string message)
-    {
-      throw new NotImplementedException();
-    }
-
-    #region Object
-    public override string ToString()
-    {
-      return peer.ToString();
-    }
-    #endregion
-
-    #region private
     private ClientWebSocket m_ClientWebSocket = null;
     private Uri peer;
     #endregion

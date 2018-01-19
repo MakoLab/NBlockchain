@@ -132,5 +132,6 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Done", CancellationToken.None);
     }
     #endregion
+
   }
 }
