@@ -8,77 +8,84 @@ using System.Threading.Tasks;
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
 
-  internal class WebSocketServer : JavaWebSocket
+  internal static class WebSocketServer
   {
 
-    internal static WebSocketServer Server(int p2p_port)
+    internal static async Task Server(int p2p_port, Action<WebSocketConnection> onConnection)
     {
       Uri _uri = new Uri($@"http://localhost:{p2p_port}/");
-      WebSocketServer _socket = new WebSocketServer();
-      Task.Factory.StartNew(() => _socket.ServerLoop(_uri));
-      return _socket;
+      await ServerLoop(_uri, onConnection);
     }
-    internal Action<WebSocketClient>  onConnection { private get; set; }
 
-    private WebSocketServer() { }
-    private void ServerLoop(Uri _uri)
+    private static async Task ServerLoop(Uri _uri, Action<WebSocketConnection> onConnection)
     {
-      try
-      {
-        HttpListener _server = new HttpListener();
-        _server.Prefixes.Add(_uri.ToString());
-        _server.Start();
-        while (true)
-        {
-          HttpListenerContext _hc = _server.GetContextAsync().Result;
-          if (!_hc.Request.IsWebSocketRequest)
-          {
-            _hc.Response.StatusCode = 400;
-            _hc.Response.Close();
-          }
-          HttpListenerWebSocketContext _context = _hc.AcceptWebSocketAsync(null).Result;
-          Task.Factory.StartNew(() => ServerMessageLoop(_context));
-        }
-      }
-      catch (Exception _ex)
-      {
-        onError?.Invoke();
-      }
-    }
-    private void ServerMessageLoop(HttpListenerWebSocketContext context)
-    {
-      WebSocket ws = context.WebSocket;
-      onConnection?.Invoke(new WebSocketClient(context.RequestUri));
-      byte[] buffer = new byte[1024];
+      HttpListener _server = new HttpListener();
+      _server.Prefixes.Add(_uri.ToString());
+      _server.Start();
       while (true)
       {
-        ArraySegment<byte> _segments = new ArraySegment<byte>(buffer);
-        WebSocketReceiveResult _receiveResult = ws.ReceiveAsync(_segments, CancellationToken.None).Result;
-        if (_receiveResult.MessageType == WebSocketMessageType.Close)
+        HttpListenerContext _hc = await _server.GetContextAsync();
+        if (!_hc.Request.IsWebSocketRequest)
         {
-          onClose?.Invoke();
-          ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None);
-          return;
+          _hc.Response.StatusCode = 400;
+          _hc.Response.Close();
         }
-        int count = _receiveResult.Count;
-        while (!_receiveResult.EndOfMessage)
-        {
-          if (count >= buffer.Length)
-          {
-            onClose?.Invoke();
-            ws.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long", CancellationToken.None);
-            return;
-          }
-          _segments = new ArraySegment<byte>(buffer, count, buffer.Length - count);
-          _receiveResult = ws.ReceiveAsync(_segments, CancellationToken.None).Result;
-          count += _receiveResult.Count;
-        }
-        string _message = Encoding.UTF8.GetString(buffer, 0, count);
-        onMessage?.Invoke(_message);
+        HttpListenerWebSocketContext _context = await  _hc.AcceptWebSocketAsync(null);
+        WebSocketConnection ws = new ServerWebSocketConnection(_context.WebSocket, _hc.Request.RemoteEndPoint);
+        onConnection?.Invoke(ws);
       }
     }
+    private class ServerWebSocketConnection : WebSocketConnection
+    {
+      public ServerWebSocketConnection(WebSocket ws, IPEndPoint remoteEndPoint)
+      {
+        m_remoteEndPoint = remoteEndPoint;
+        Task.Factory.StartNew(() => ServerMessageLoop(ws));
+      }
 
+      #region WebSocketConnection
 
+      protected override Task SendTask(string message)
+      {
+        return m_WebSocket.SendAsync(message.GetArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);
+      }
+      #endregion
+      public override string ToString()
+      {
+        return m_remoteEndPoint.ToString();
+      }
+      private WebSocket m_WebSocket = null;
+      private IPEndPoint m_remoteEndPoint;
+      private void ServerMessageLoop(WebSocket ws)
+      {
+        byte[] buffer = new byte[1024];
+        while (true)
+        {
+          ArraySegment<byte> _segments = new ArraySegment<byte>(buffer);
+          WebSocketReceiveResult _receiveResult = ws.ReceiveAsync(_segments, CancellationToken.None).Result;
+          if (_receiveResult.MessageType == WebSocketMessageType.Close)
+          {
+            onClose?.Invoke();
+            ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None);
+            return;
+          }
+          int count = _receiveResult.Count;
+          while (!_receiveResult.EndOfMessage)
+          {
+            if (count >= buffer.Length)
+            {
+              onClose?.Invoke();
+              ws.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long", CancellationToken.None);
+              return;
+            }
+            _segments = new ArraySegment<byte>(buffer, count, buffer.Length - count);
+            _receiveResult = ws.ReceiveAsync(_segments, CancellationToken.None).Result;
+            count += _receiveResult.Count;
+          }
+          string _message = Encoding.UTF8.GetString(buffer, 0, count);
+          onMessage?.Invoke(_message);
+        }
+      }
+    }
   }
-
 }

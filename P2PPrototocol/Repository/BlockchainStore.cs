@@ -12,6 +12,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     {
       blockchain.Add(getGenesisBlock());
     }
+
     internal class NewBlockEventArgs : EventArgs
     {
       public NewBlockEventArgs(Block newBlock)
@@ -20,15 +21,7 @@ namespace NBlockchain.P2PPrototocol.Repository
       }
       public Block Block { get; private set; }
     }
-    //internal static BlockchainStore Instance()
-    //{
-    //  return m_Singleton;
-    //}
-    //internal void addBlock(Block newBlock)
-    //{
-    //  if (Block.isValidNewBlock(newBlock, getLatestBlock()))
-    //    Add(newBlock);
-    //}
+
     #region IRepositoryAgentInterface
     public string stringify()
     {
@@ -80,7 +73,6 @@ namespace NBlockchain.P2PPrototocol.Repository
     {
       return new Block(0, "0", 1465154705, "my genesis block!!", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7");
     }
-    private static BlockchainStore m_Singleton { get; } = new BlockchainStore();
     private List<Block> blockchain { get; set; } = new List<Block>();
     #endregion
 

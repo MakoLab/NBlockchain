@@ -50,12 +50,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CryptoJSUnitTest.cs" />
-    <Compile Include="NodeJSAPI\JavaWebSocketUnitTest.cs" />
+    <Compile Include="NodeJSAPI\WebSocketServerUnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExpressUnitTest.cs" />
     <Compile Include="AgentServicesUnitTest.cs" />
     <Compile Include="BlockchainStoreUnitTest.cs" />
     <Compile Include="CommunicationEngineUnitTest.cs" />
+    <Compile Include="NodeJSAPI\WebSocketClientUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

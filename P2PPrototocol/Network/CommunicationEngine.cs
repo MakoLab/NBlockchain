@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 using static NBlockchain.P2PPrototocol.Network.Message;
@@ -14,6 +15,7 @@ namespace NBlockchain.P2PPrototocol.Network
   internal class CommunicationEngine : IDisposable, INetworkAgentAPI
   {
 
+    #region API
     /// <summary>
     /// Craetes instance of CommunicationEngine
     /// </summary>
@@ -25,50 +27,48 @@ namespace NBlockchain.P2PPrototocol.Network
       connectToPeers(initialPeers);
       Log("CommunicationEngine has been started");
     }
-
     public void initP2PServer()
     {
-      WebSocketServer server = WebSocketServer.Server(p2p_port);
-      server.onConnection = client => initConnection(client);
+      Task _servrer = WebSocketServer.Server(p2p_port, async _ws => await initConnection(_ws));
       Log($"listening websocket p2p port on: {p2p_port}");
     }
+    #endregion
 
     #region INetworkAgentAPI
     /// <summary>
     /// cockets
     /// </summary>
-    public List<WebSocketClient> sockets { get; private set; } = new List<WebSocketClient>();
+    public List<WebSocketConnection> sockets { get; private set; } = new List<WebSocketConnection>();
     public void connectToPeers(Uri[] newPeers)
     {
+      List<Task> _connectionJobs = new List<Task>();
       foreach (Uri peer in newPeers)
-      {
-        WebSocketClient ws = new WebSocketClient(peer);
-        ws.onOpen = () => initConnection(ws);
-        ws.onError = () => Log("connection failed");
-      }
+        _connectionJobs.Add(WebSocketClient.Connect(peer, async ws => await initConnection(ws), () => Log("connection failed")));
+      Task.WaitAll(_connectionJobs.ToArray());
     }
     #endregion
 
-    private void initConnection(WebSocketClient ws)
+    #region private
+    private async Task initConnection(WebSocketConnection ws)
     {
       sockets.Add(ws);
       initMessageHandler(ws);
       initErrorHandler(ws);
-      write(ws, queryChainLengthMsg());
+      await write(ws, queryChainLengthMsg());
     }
-    private void initMessageHandler(WebSocketClient ws)
+    private void initMessageHandler(WebSocketConnection ws)
     {
-      ws.onMessage = (data) =>
+      ws.onMessage = async (data) =>
       {
         Message message = Message.parse(data);
         Log($"Received message { message.stringify()}");
         switch (message.type)
         {
           case MessageType.QUERY_LATEST:
-            write(ws, responseLatestMsg());
+            await write(ws, responseLatestMsg());
             break;
           case MessageType.QUERY_ALL:
-            write(ws, responseChainMsg());
+            await write(ws, responseChainMsg());
             break;
           case MessageType.RESPONSE_BLOCKCHAIN:
             handleBlockchainResponse(message);
@@ -76,14 +76,14 @@ namespace NBlockchain.P2PPrototocol.Network
         };
       };
     }
-    private void initErrorHandler(WebSocketClient ws)
+    private void initErrorHandler(WebSocketConnection ws)
     {
       ws.onClose = () => closeConnection(ws);
       ws.onError = () => closeConnection(ws);
     }
-    private void closeConnection(WebSocketClient _ws)
+    private void closeConnection(WebSocketConnection _ws)
     {
-      Log($"connection failed to peer: {_ws.url}");
+      Log($"connection failed to peer: {_ws.ToString()}");
       sockets.Remove(_ws);
     }
     private void handleBlockchainResponse(Message message)
@@ -149,11 +149,13 @@ namespace NBlockchain.P2PPrototocol.Network
         data = m_Repository.getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
       };
     }
-    private void write(WebSocketClient ws, Message message) { ws.send(message.stringify()); }
+    private async Task write(WebSocketConnection ws, Message message) { await ws.send(message.stringify()); }
     private void broadcast(Message message)
     {
+      List<Task> _jobs = new List<Task>();
       foreach (var socket in sockets)
-        write(socket, message);
+        _jobs.Add(write(socket, message));
+      Task.WaitAll(_jobs.ToArray());
     }
     private void CommunicationEngine_Broadcast(object sender, BlockchainStore.NewBlockEventArgs e)
     {
@@ -168,6 +170,7 @@ namespace NBlockchain.P2PPrototocol.Network
     private int p2p_port { get; set; } = 6001;
     private Uri[] initialPeers { get; set; } = new Uri[] { };
     private IRepositoryNetwork m_Repository;
+    #endregion
 
     #region IDisposable
     /// <summary>
@@ -175,6 +178,7 @@ namespace NBlockchain.P2PPrototocol.Network
     /// </summary>
     public void Dispose() { }
     #endregion
+
   }
 
 }

@@ -10,6 +10,7 @@ using NBlockchain.P2PPrototocol.Repository;
 
 namespace NBlockchain.P2PPrototocol.lUnitTest
 {
+
   [TestClass]
   public class AgentServicesUnitTest
   {
@@ -47,32 +48,32 @@ namespace NBlockchain.P2PPrototocol.lUnitTest
       }
       Assert.AreEqual<int>(1, _log.Count);
     }
+    private class NetworkAgent : INetworkAgentAPI
+    {
+      public List<WebSocketConnection> sockets => new List<WebSocketConnection>();
+
+      public void connectToPeers(Uri[] peer)
+      {
+        throw new NotImplementedException();
+      }
+      public void initP2PServer()
+      {
+        throw new NotImplementedException();
+      }
+    }
+    private class TestRepository : IRepositoryAgentInterface
+    {
+      public Block generateNextBlock(string data)
+      {
+        throw new NotImplementedException();
+      }
+
+      public string stringify()
+      {
+        throw new NotImplementedException();
+      }
+    }
+
   }
-  internal class NetworkAgent : INetworkAgentAPI
-  {
-    public List<WebSocketClient> sockets => new List<WebSocketClient>();
 
-    public void connectToPeers(Uri[] peer)
-    {
-      throw new NotImplementedException();
-    }
-    public void initP2PServer()
-    {
-      throw new NotImplementedException();
-    }
-
-  }
-
-  internal class TestRepository : IRepositoryAgentInterface
-  {
-    public Block generateNextBlock(string data)
-    {
-      throw new NotImplementedException();
-    }
-
-    public string stringify()
-    {
-      throw new NotImplementedException();
-    }
-  }
 }

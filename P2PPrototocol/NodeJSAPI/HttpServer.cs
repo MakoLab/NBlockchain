@@ -73,7 +73,6 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
           peer = new Uri[] { new Uri(request.UserHostName) }
         };
       }
-
       public HTTPBody body { get; private set; }
 
     }
