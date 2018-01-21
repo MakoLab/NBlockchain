@@ -25,7 +25,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     #region IRepositoryAgentInterface
     public string stringify()
     {
-      return JSON.stringify(blockchain);
+      return blockchain.stringify<List<Block>>();
     }
     public Block generateNextBlock(string blockData)
     {

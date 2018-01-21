@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
@@ -87,11 +88,10 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       m_HTTPServer.Prefixes.Add(string.Format(m_PrefixTemplate, m_PortNumber, path));
       m_PostHandlers.Add(path, handcallbackler);
     }
-    internal void Listen(Action callback)
+    internal async Task Listen(Action callback)
     {
-      m_HTTPServer.Start();
-      System.Threading.Tasks.Task.Run(() => HhttpAsynchronousHandler(m_HTTPServer));
       callback();
+      await HhttpAsynchronousHandler(m_HTTPServer);
     }
     /// <summary>
     /// Gets a value that indicates whether <see cref="HttpServer"/>can be used with the current operating system.
@@ -137,13 +137,14 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     private HttpListener m_HTTPServer;
     private int m_PortNumber = -1;
     private const string m_PrefixTemplate = @"http://localhost:{0}{1}/";
-    private void HhttpAsynchronousHandler(HttpListener m_HTTPServer)
+    private async Task HhttpAsynchronousHandler(HttpListener m_HTTPServer)
     {
+      m_HTTPServer.Start();
       while (true)
       {
         if (!IsSupported)
           break;
-        HttpListenerContext _context = m_HTTPServer.GetContext();
+        HttpListenerContext _context = await m_HTTPServer.GetContextAsync();
         HttpListenerRequest _request = _context.Request;
         switch (_request.HttpMethod.ToLower())
         {

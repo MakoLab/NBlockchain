@@ -60,7 +60,7 @@ namespace NBlockchain.P2PPrototocol.Network
     {
       ws.onMessage = async (data) =>
       {
-        Message message = Message.parse(data);
+        Message message = data.parse<Message>();
         Log($"Received message { message.stringify()}");
         switch (message.type)
         {
@@ -71,7 +71,7 @@ namespace NBlockchain.P2PPrototocol.Network
             await write(ws, responseChainMsg());
             break;
           case MessageType.RESPONSE_BLOCKCHAIN:
-            handleBlockchainResponse(message);
+            handleBlockchainResponse(message.data);
             break;
         };
       };
@@ -86,9 +86,10 @@ namespace NBlockchain.P2PPrototocol.Network
       Log($"connection failed to peer: {_ws.ToString()}");
       sockets.Remove(_ws);
     }
-    private void handleBlockchainResponse(Message message)
+    private void handleBlockchainResponse(string data)
     {
-      List<Block> receivedBlocks = message.Parse(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
+      List<Block> receivedBlocks = data.parse<List<Block>>(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
+      receivedBlocks.Sort();
       Block latestBlockReceived = receivedBlocks[receivedBlocks.Count - 1];
       Block latestBlockHeld = m_Repository.getLatestBlock();
       if (latestBlockReceived.index > latestBlockHeld.index)

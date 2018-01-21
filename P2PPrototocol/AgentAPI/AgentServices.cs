@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Threading.Tasks;
 using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
@@ -42,7 +43,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
           Network.connectToPeers(req.body.peer);
           res.send();
         });
-      m_HttpServer.Listen(() => Log($"Listening http on port: { http_port}"));
+      Task m_HTTPServer = m_HttpServer.Listen(() => Log($"Listening http on port: { http_port}"));
     }
     #endregion
 

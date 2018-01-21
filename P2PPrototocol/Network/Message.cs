@@ -1,11 +1,12 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using NBlockchain.P2PPrototocol.Repository;
 
 namespace NBlockchain.P2PPrototocol.Network
 {
-
+  [DataContract]
   internal class Message
   {
     internal enum MessageType
@@ -15,22 +16,24 @@ namespace NBlockchain.P2PPrototocol.Network
       RESPONSE_BLOCKCHAIN = 2
     };
 
+    [DataMember]
     internal MessageType type { get; set; }
+    [DataMember]
     internal string data { get; set; }
 
-    internal List<Block> Parse()
-    {
-      //JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
-      throw new NotImplementedException();
-    }
-    internal string stringify()
-    {
-      throw new NotImplementedException();
-    }
-    internal static Message parse(string data)
-    {
-      throw new NotImplementedException();
-    }
+    //internal List<Block> Parse()
+    //{
+    //  //JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
+    //  throw new NotImplementedException();
+    //}
+    //internal string stringify()
+    //{
+    //  throw new NotImplementedException();
+    //}
+    //internal static Message parse(string data)
+    //{
+    //  throw new NotImplementedException();
+    //}
   }
 
 }

@@ -1,10 +1,12 @@
 ﻿
 using System;
+using System.Runtime.Serialization;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 
 namespace NBlockchain.P2PPrototocol.Repository
 {
-  internal class Block
+  [DataContract]
+  internal class Block: IBlock
   {
 
     #region operators
@@ -38,11 +40,22 @@ namespace NBlockchain.P2PPrototocol.Repository
     }
     #endregion
 
-    internal int index { get; private set; }
-    internal string previousHash { get; private set; }
-    internal int timestamp { get; private set; }
-    internal string data { get; private set; }
-    internal string hash { get; private set; }
+    #region IBlock
+    [DataMember]
+    public int index { get; private set; }
+    [DataMember]
+    public string previousHash { get; private set; }
+    [DataMember]
+    public int timestamp { get; private set; }
+    [DataMember]
+    public string data { get; private set; }
+    [DataMember]
+    public string hash { get; private set; }
+    public string calculateHash()
+    {
+      return CryptoJS.SHA256($"{index}{previousHash}{timestamp}{data}");
+    }
+    #endregion
 
     internal Block(int index, string previousHash, int timestamp, string data, string hash)
     {
@@ -52,7 +65,7 @@ namespace NBlockchain.P2PPrototocol.Repository
       this.data = data;
       this.hash = hash;
     }
-    public Block(Block previousBlock, string blockData)
+    internal Block(Block previousBlock, string blockData)
     {
       this.index = previousBlock.index + 1;
       this.previousHash = previousBlock.hash;
@@ -60,10 +73,8 @@ namespace NBlockchain.P2PPrototocol.Repository
       this.data = blockData;
       this.hash = calculateHash();
     }
-    internal string calculateHash()
-    {
-      return CryptoJS.SHA256($"{index}{previousHash}{timestamp}{data}");
-    }
+
+
     #region override Object
     public override string ToString()
     {
@@ -80,9 +91,19 @@ namespace NBlockchain.P2PPrototocol.Repository
         return false;
       return _yours.calculateHash() == this.calculateHash();
     }
-    internal string stringify()
+    #endregion
+
+    #region IEquatable
+    public bool Equals(IBlock other)
     {
-      return JSON.stringify(this);
+      return Equals(other);
+    }
+    #endregion
+
+    #region IComparable
+    public int CompareTo(IBlock other)
+    {
+      return index.CompareTo(other.index);
     }
     #endregion
 
