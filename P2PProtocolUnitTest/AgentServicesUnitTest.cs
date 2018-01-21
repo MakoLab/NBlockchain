@@ -63,11 +63,10 @@ namespace NBlockchain.P2PPrototocol.lUnitTest
     }
     private class TestRepository : IRepositoryAgentInterface
     {
-      public Block generateNextBlock(string data)
+      public IBlock generateNextBlock(string data)
       {
         throw new NotImplementedException();
       }
-
       public string stringify()
       {
         throw new NotImplementedException();

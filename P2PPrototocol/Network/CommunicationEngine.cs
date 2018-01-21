@@ -71,7 +71,7 @@ namespace NBlockchain.P2PPrototocol.Network
             await write(ws, responseChainMsg());
             break;
           case MessageType.RESPONSE_BLOCKCHAIN:
-            handleBlockchainResponse(message.data);
+            m_Repository.handleBlockchainResponse(message.data, () => broadcast(queryAllMsg()));
             break;
         };
       };
@@ -85,46 +85,6 @@ namespace NBlockchain.P2PPrototocol.Network
     {
       Log($"connection failed to peer: {_ws.ToString()}");
       sockets.Remove(_ws);
-    }
-    private void handleBlockchainResponse(string data)
-    {
-      List<Block> receivedBlocks = data.parse<List<Block>>(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
-      receivedBlocks.Sort();
-      Block latestBlockReceived = receivedBlocks[receivedBlocks.Count - 1];
-      Block latestBlockHeld = m_Repository.getLatestBlock();
-      if (latestBlockReceived.index > latestBlockHeld.index)
-      {
-        Log($"blockchain possibly behind. We got: {latestBlockHeld.index} Peer got: {latestBlockReceived.index}");
-        if (latestBlockHeld.hash == latestBlockReceived.previousHash)
-        {
-          Log("We can append the received block to our chain");
-          m_Repository.Add(latestBlockReceived);
-          broadcast(responseLatestMsg());
-        }
-        else if (receivedBlocks.Count == 1)
-        {
-          Log("We have to query the chain from our peer");
-          broadcast(queryAllMsg());
-        }
-        else
-        {
-          Log("Received blockchain is longer than current blockchain");
-          replaceChain(receivedBlocks);
-        }
-      }
-      else
-        Log("received blockchain is not longer than received blockchain. Do nothing");
-    }
-    private void replaceChain(List<Block> newBlocks)
-    {
-      if (m_Repository.isValidChain(newBlocks) && newBlocks.Count > m_Repository.Count)
-      {
-        Log("Received blockchain is valid. Replacing current blockchain with received blockchain");
-        m_Repository.replaceChain(newBlocks);
-        broadcast(responseLatestMsg());
-      }
-      else
-        Log("Received blockchain invalid");
     }
     private Message queryChainLengthMsg()
     {
@@ -158,7 +118,7 @@ namespace NBlockchain.P2PPrototocol.Network
         _jobs.Add(write(socket, message));
       Task.WaitAll(_jobs.ToArray());
     }
-    private void CommunicationEngine_Broadcast(object sender, BlockchainStore.NewBlockEventArgs e)
+    private void CommunicationEngine_Broadcast(object sender, NewBlockEventArgs e)
     {
       Message _newMessage = new Message()
       {

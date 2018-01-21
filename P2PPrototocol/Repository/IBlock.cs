@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 
 namespace NBlockchain.P2PPrototocol.Repository
 {

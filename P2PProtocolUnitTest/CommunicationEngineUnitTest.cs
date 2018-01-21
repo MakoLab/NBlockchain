@@ -47,26 +47,27 @@ namespace NBlockchain.P2PPrototocol.lUnitTest
     {
 
       internal bool IsCosistent { get { return Broadcast != null; } }
+
       #region IRepositoryNetwork
       public int Count => throw new NotImplementedException();
-      public event EventHandler<BlockchainStore.NewBlockEventArgs> Broadcast;
-      public void Add(Block latestBlockReceived)
+      public event EventHandler<NewBlockEventArgs> Broadcast;
+      public void Add(IBlock latestBlockReceived)
       {
         throw new NotImplementedException();
       }
-      public Block getLatestBlock()
+      public IBlock getLatestBlock()
       {
         throw new NotImplementedException();
       }
-      public bool isValidChain(List<Block> newBlocks)
-      {
-        throw new NotImplementedException();
-      }
-      public void replaceChain(List<Block> newBlocks)
+      public bool isValidChain(IEnumerable<IBlock> newBlocks)
       {
         throw new NotImplementedException();
       }
       public string stringify()
+      {
+        throw new NotImplementedException();
+      }
+      public void handleBlockchainResponse(string data, Action queryAll)
       {
         throw new NotImplementedException();
       }

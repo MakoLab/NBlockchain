@@ -29,7 +29,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
       m_HttpServer.get("/blocks", (req, res) => res.send(Repository.stringify()));
       m_HttpServer.post("/mineBlock", (req, res) =>
         {
-          Block newBlock = Repository.generateNextBlock(req.body.data);
+          IBlock newBlock = Repository.generateNextBlock(req.body.data);
           //broadcast(responseLatestMsg());
           Log($"block added: {newBlock.stringify()}");
           res.send();
@@ -43,7 +43,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
           Network.connectToPeers(req.body.peer);
           res.send();
         });
-      Task m_HTTPServer = m_HttpServer.Listen(() => Log($"Listening http on port: { http_port}"));
+      Task m_HTTPServerTask = m_HttpServer.Listen(() => Log($"Listening http on port: { http_port}"));
     }
     #endregion
 

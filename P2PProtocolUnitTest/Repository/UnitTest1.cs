@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NBlockchain.P2PPrototocol.Repository;
 using NBlockchain.P2PPrototocol.NodeJSAPI;

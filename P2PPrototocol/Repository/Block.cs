@@ -5,6 +5,7 @@ using NBlockchain.P2PPrototocol.NodeJSAPI;
 
 namespace NBlockchain.P2PPrototocol.Repository
 {
+
   [DataContract]
   internal class Block: IBlock
   {
@@ -57,6 +58,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     }
     #endregion
 
+    #region constructors
     internal Block(int index, string previousHash, int timestamp, string data, string hash)
     {
       this.index = index;
@@ -65,7 +67,7 @@ namespace NBlockchain.P2PPrototocol.Repository
       this.data = data;
       this.hash = hash;
     }
-    internal Block(Block previousBlock, string blockData)
+    internal Block(IBlock previousBlock, string blockData)
     {
       this.index = previousBlock.index + 1;
       this.previousHash = previousBlock.hash;
@@ -73,7 +75,7 @@ namespace NBlockchain.P2PPrototocol.Repository
       this.data = blockData;
       this.hash = calculateHash();
     }
-
+    #endregion
 
     #region override Object
     public override string ToString()

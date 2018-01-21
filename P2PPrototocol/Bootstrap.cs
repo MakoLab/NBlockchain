@@ -29,7 +29,7 @@ namespace NBlockchain.P2PPrototocol
     /// </summary>
     public void Run()
     {
-      m_BlockchainStore = new BlockchainStore();
+      m_BlockchainStore = new BlockchainStore(Log);
       m_CommunicationEngine = new CommunicationEngine(m_BlockchainStore, Log);
       m_Agent = new AgentAPI.AgentServices(m_BlockchainStore, m_CommunicationEngine, Log);
       m_CommunicationEngine.initP2PServer();

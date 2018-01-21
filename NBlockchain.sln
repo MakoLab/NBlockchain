@@ -9,7 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P2PPrototocol", "P2PPrototo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C44C0AB-3093-4EBE-92E3-078B9EE54D15}"
 	ProjectSection(SolutionItems) = preProject
-		..\OOI\Configuration\Networking\Serializers\JSONDataContractSerializers.cs = ..\OOI\Configuration\Networking\Serializers\JSONDataContractSerializers.cs
 		..\documentation\GraphChain.js\main.js = ..\documentation\GraphChain.js\main.js
 	EndProjectSection
 EndProject

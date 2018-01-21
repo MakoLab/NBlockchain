@@ -1,8 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using NBlockchain.P2PPrototocol.Repository;
+﻿using System.Runtime.Serialization;
 
 namespace NBlockchain.P2PPrototocol.Network
 {
@@ -21,19 +17,6 @@ namespace NBlockchain.P2PPrototocol.Network
     [DataMember]
     internal string data { get; set; }
 
-    //internal List<Block> Parse()
-    //{
-    //  //JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
-    //  throw new NotImplementedException();
-    //}
-    //internal string stringify()
-    //{
-    //  throw new NotImplementedException();
-    //}
-    //internal static Message parse(string data)
-    //{
-    //  throw new NotImplementedException();
-    //}
   }
 
 }

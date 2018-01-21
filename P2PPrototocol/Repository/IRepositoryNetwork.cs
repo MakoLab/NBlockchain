@@ -7,13 +7,13 @@ namespace NBlockchain.P2PPrototocol.Repository
   internal interface IRepositoryNetwork
   {
 
+    event EventHandler<NewBlockEventArgs> Broadcast;
     int Count { get; }
-    event EventHandler<BlockchainStore.NewBlockEventArgs> Broadcast;
-    Block getLatestBlock();
-    void Add(Block latestBlockReceived);
-    bool isValidChain(List<Block> newBlocks);
-    void replaceChain(List<Block> newBlocks);
+    IBlock getLatestBlock();
+    void Add(IBlock latestBlockReceived);
+    bool isValidChain(IEnumerable<IBlock> newBlocks);
     string stringify();
+    void handleBlockchainResponse(string data, Action queryAll);
 
   }
 }
