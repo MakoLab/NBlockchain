@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
@@ -19,18 +20,22 @@ namespace NBlockchain.P2PPrototocol.Network
     /// <summary>
     /// Craetes instance of CommunicationEngine
     /// </summary>
-    internal CommunicationEngine(IRepositoryNetwork repository, Action<string> log)
+    internal CommunicationEngine(IRepositoryNetwork repository, int webSocketP2pPort, Action<string> log)
     {
-      Log = log;
       m_Repository = repository;
+      Log = log;
+      if (IPEndPoint.MaxPort > webSocketP2pPort && IPEndPoint.MinPort < webSocketP2pPort)
+        this.WebSocketP2pPort = webSocketP2pPort;
+      else
+        Log($"Wrong port number {webSocketP2pPort}; communication will be started using default port number");
       m_Repository.Broadcast += CommunicationEngine_Broadcast;
       connectToPeers(initialPeers);
       Log("CommunicationEngine has been started");
     }
     public void initP2PServer()
     {
-      Task _servrer = WebSocketServer.Server(p2p_port, async _ws => await initConnection(_ws));
-      Log($"listening websocket p2p port on: {p2p_port}");
+      Task _servrer = WebSocketServer.Server(WebSocketP2pPort, async _ws => await initConnection(_ws));
+      Log($"listening websocket p2p port on: {WebSocketP2pPort}");
     }
     #endregion
 
@@ -128,7 +133,7 @@ namespace NBlockchain.P2PPrototocol.Network
       broadcast(_newMessage);
     }
     private Action<string> Log { get; }
-    private int p2p_port { get; set; } = 6001;
+    private int WebSocketP2pPort { get; set; } = 6001;
     private Uri[] initialPeers { get; set; } = new Uri[] { };
     private IRepositoryNetwork m_Repository;
     #endregion

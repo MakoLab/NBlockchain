@@ -19,7 +19,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
     {
       List<string> _log = new List<string>();
       TestRepositoryNetwork _repository = new TestRepositoryNetwork();
-      using (CommunicationEngine _new = new CommunicationEngine(_repository, x => _log.Add(x)))
+      using (CommunicationEngine _new = new CommunicationEngine(_repository, -1, x => _log.Add(x)))
       {
         Assert.AreEqual<int>(1, _log.Count);
         Assert.IsTrue(_repository.IsCosistent);
@@ -32,7 +32,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
       Task _server = WebSocketServer.Server(3001, x => _connected = true);
       List<string> _log = new List<string>();
       TestRepositoryNetwork _repository = new TestRepositoryNetwork();
-      using (CommunicationEngine _new = new CommunicationEngine(_repository, x => _log.Add(x)))
+      using (CommunicationEngine _new = new CommunicationEngine(_repository, -1, x => _log.Add(x)))
       {
         Assert.AreEqual<int>(1, _log.Count);
         Assert.IsTrue(_repository.IsCosistent);

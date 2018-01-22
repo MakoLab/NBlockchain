@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
@@ -16,8 +17,12 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     #endregion
 
     #region API
-    public AgentServices(IRepositoryAgentInterface repository, INetworkAgentAPI network, Action<string> log)
+    public AgentServices(IRepositoryAgentInterface repository, INetworkAgentAPI network, int _AgentHTTPServerPortNumber, Action<string> log)
     {
+      if (IPEndPoint.MaxPort > _AgentHTTPServerPortNumber && IPEndPoint.MinPort < _AgentHTTPServerPortNumber)
+        this.AgentHTTPServerPortNumber = _AgentHTTPServerPortNumber;
+      else
+        Log($"Wrong port number {_AgentHTTPServerPortNumber}; communication will be started using default port number");
       this.Repository = repository;
       this.Network = network;
       this.Log = log;
@@ -25,7 +30,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     }
     internal void initHttpServer()
     {
-      m_HttpServer = new HttpServer(http_port, this.Log);
+      m_HttpServer = new HttpServer(AgentHTTPServerPortNumber, this.Log);
       m_HttpServer.get("/blocks", (req, res) => res.send(Repository.stringify()));
       m_HttpServer.post("/mineBlock", (req, res) =>
         {
@@ -45,7 +50,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
           Network.connectToPeers(new Uri[] {PeerContract.Parse(req.body).PeerUri });
           res.send();
         });
-      Task m_HTTPServerTask = m_HttpServer.Listen(() => Log($"Listening http on port: { http_port}"));
+      Task m_HTTPServerTask = m_HttpServer.Listen(() => Log($"Listening http on port: { AgentHTTPServerPortNumber}"));
     }
     #endregion
 
@@ -59,7 +64,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     #region private
     private HttpServer m_HttpServer = null;
     private Action<string> Log { get; }
-    private int http_port { get; set; } = 3001;
+    private int AgentHTTPServerPortNumber { get; set; } = 3001;
     #endregion
 
   }

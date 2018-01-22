@@ -18,7 +18,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
     public void ServiceResponseAcceptedTestMethod()
     {
       List<string> _log = new List<string>();
-      using (AgentServices _services = new AgentServices(new TestRepository(), new NetworkAgent(), (x) => _log.Add(x)))
+      using (AgentServices _services = new AgentServices(new TestRepository(), new NetworkAgent(), -1, (x) => _log.Add(x)))
       {
         Assert.AreEqual<int>(1, _log.Count);
         using (HttpClient _client = new HttpClient())
