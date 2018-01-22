@@ -60,8 +60,8 @@ namespace NBlockchain.P2PPrototocol.Network
     {
       ws.onMessage = async (data) =>
       {
-        Message message = data.parse<Message>();
-        Log($"Received message { message.stringify()}");
+        Message message = data.Parse<Message>();
+        Log($"Received message { message.Stringify<Message>()}");
         switch (message.type)
         {
           case MessageType.QUERY_LATEST:
@@ -110,7 +110,7 @@ namespace NBlockchain.P2PPrototocol.Network
         data = m_Repository.getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
       };
     }
-    private async Task write(WebSocketConnection ws, Message message) { await ws.send(message.stringify()); }
+    private async Task write(WebSocketConnection ws, Message message) { await ws.send(message.Stringify<Message>()); }
     private void broadcast(Message message)
     {
       List<Task> _jobs = new List<Task>();

@@ -14,7 +14,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
   /// </summary>
   internal static class JSON
   {
-    internal static type parse<type>(this string message)
+    internal static type Parse<type>(this string message)
     {
       if (String.IsNullOrEmpty(message))
         throw new ArgumentException(nameof(message), "The string cannot be null or empty.");
@@ -26,7 +26,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       }
     }
 
-    internal static string stringify<type>(this type graph)
+    internal static string Stringify<type>(this type graph)
     {
       if (graph == null)
         throw new ArgumentNullException(nameof(graph));

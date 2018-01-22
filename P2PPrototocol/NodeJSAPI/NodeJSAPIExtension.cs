@@ -17,9 +17,9 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
         _ret.Add(function(_socket));
       return _ret.ToArray();
     }
-    internal static int Timestamp(this DateTime date) // new Date().getTime() / 1000; - Gets the time value in milliseconds.
+    internal static long Timestamp(this DateTime date) // new Date().getTime() / 1000; - Gets the time value in milliseconds.
     {
-      return Convert.ToInt32(date.Ticks / 1000);
+      return date.Ticks / 1000;
     }
     internal static ArraySegment<byte> GetArraySegment(this string message)
     {

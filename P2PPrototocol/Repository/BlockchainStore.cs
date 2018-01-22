@@ -19,7 +19,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     #region IRepositoryAgentInterface
     public string stringify()
     {
-      return blockchain.stringify<List<Block>>();
+      return blockchain.Stringify<List<Block>>();
     }
     public IBlock generateNextBlock(string blockData)
     {
@@ -60,7 +60,7 @@ namespace NBlockchain.P2PPrototocol.Repository
 
     public void handleBlockchainResponse(string data, Action queryAll)
     {
-      List<Block> receivedBlocks = data.parse<List<Block>>(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
+      List<Block> receivedBlocks = data.Parse<List<Block>>(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
       receivedBlocks.Sort();
       Block latestBlockReceived = receivedBlocks[receivedBlocks.Count - 1];
       IBlock latestBlockHeld = getLatestBlock();

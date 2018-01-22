@@ -47,7 +47,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     [DataMember]
     public string previousHash { get; private set; }
     [DataMember]
-    public int timestamp { get; private set; }
+    public long timestamp { get; private set; }
     [DataMember]
     public string data { get; private set; }
     [DataMember]
@@ -55,6 +55,10 @@ namespace NBlockchain.P2PPrototocol.Repository
     public string calculateHash()
     {
       return CryptoJS.SHA256($"{index}{previousHash}{timestamp}{data}");
+    }
+    public string stringify()
+    {
+      return this.Stringify<Block>();
     }
     #endregion
 
@@ -107,6 +111,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     {
       return index.CompareTo(other.index);
     }
+
     #endregion
 
   }

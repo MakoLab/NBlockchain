@@ -60,7 +60,6 @@
     <Compile Include="Repository\BlockchainStoreUnitTest.cs" />
     <Compile Include="Network\CommunicationEngineUnitTest.cs" />
     <Compile Include="NodeJSAPI\WebSocketClientUnitTest.cs" />
-    <Compile Include="Repository\RepositoryUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

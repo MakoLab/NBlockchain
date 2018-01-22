@@ -9,9 +9,10 @@ namespace NBlockchain.P2PPrototocol.Repository
 
     int index { get; }
     string previousHash { get; }
-    int timestamp { get; }
+    long timestamp { get; }
     string data { get; }
     string hash { get; }
+    string stringify();
 
   }
 

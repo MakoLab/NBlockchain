@@ -25,6 +25,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       await Task.Delay(100);
       ClientWebSocket m_ClientWebSocket = new ClientWebSocket();
       await m_ClientWebSocket.ConnectAsync(m_clientURI, CancellationToken.None);
+      await Task.Delay(20);
       Assert.IsNotNull(_socket);
       Assert.IsTrue(_onConnection);
       IPEndPoint _endPoint = _socket.ToString().ParseIPEndPoint();

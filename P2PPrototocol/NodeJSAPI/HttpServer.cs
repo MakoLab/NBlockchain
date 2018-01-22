@@ -43,7 +43,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
         m_Response.StatusCode = (int)HttpStatusCode.Accepted;
         m_Response.SendChunked = false;
         m_Response.ContentEncoding = System.Text.Encoding.UTF8;
-        if (!String.IsNullOrEmpty(content))
+        if (String.IsNullOrEmpty(content))
           m_Response.ContentLength64 = 0;
         else
         {
@@ -148,18 +148,28 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
               Action<Request, Response> _action;
               if (m_GetHandlers.TryGetValue(_request.Url.LocalPath, out _action))
               {
-                Log($"Calling action for {_request.Url.LocalPath}");
+                Log($"Calling GET action for {_request.Url.LocalPath}");
                 _action(new Request(_request), new Response(_context.Response));
               }
               else
-                Log($"Skiped action for {_request.Url.LocalPath}");
+                Log($"Skiped GET action for {_request.Url.LocalPath}");
               break;
             }
           case "post":
             {
               Action<Request, Response> _action;
-              if (m_PostHandlers.TryGetValue(_request.Url.ToString(), out _action))
+              if (m_PostHandlers.TryGetValue(_request.Url.LocalPath, out _action))
+              {
+                Log($"Calling POST action for {_request.Url.LocalPath}");
                 _action(new Request(_request), new Response(_context.Response));
+              }
+              else
+              {
+                _context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                _context.Response.StatusDescription = "Cannot find the requested action";
+                _context.Response.Close();
+                Log($"Skiped POST action for {_request.Url.LocalPath}");
+              }
               break;
             }
           default:

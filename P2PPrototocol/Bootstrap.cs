@@ -22,7 +22,9 @@ namespace NBlockchain.P2PPrototocol
       m_CommunicationEngine.Dispose();
     }
     #endregion
-
+    /// <summary>
+    /// Log
+    /// </summary>
     public Action<string> Log { private get; set; } = message => { };
     /// <summary>
     /// Run the communication machine

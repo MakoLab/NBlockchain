@@ -29,9 +29,11 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
       m_HttpServer.get("/blocks", (req, res) => res.send(Repository.stringify()));
       m_HttpServer.post("/mineBlock", (req, res) =>
         {
-          IBlock newBlock = Repository.generateNextBlock(DataContract.Parse(req.body).data);
+          string _newData = DataContract.Parse(req.body).data;
+          Log($"adding new block using the data: {_newData}");
+          IBlock _newBlock = Repository.generateNextBlock(_newData);
           //broadcast(responseLatestMsg());
-          Log($"block added: {newBlock.stringify()}");
+          Log($"block added: {_newBlock.stringify()}");
           res.send();
         });
       m_HttpServer.get("/peers", (req, res) =>
