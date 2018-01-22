@@ -67,14 +67,9 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
 
       public Request(HttpListenerRequest request)
       {
-
-        body = new HTTPBody()
-        {
-          data = request.GetDocumentContent(),
-          peer = new Uri[] { new Uri(request.UserHostName) }
-        };
+        body = request.GetDocumentContent();
       }
-      public HTTPBody body { get; private set; }
+      public string body { get; private set; }
 
     }
 

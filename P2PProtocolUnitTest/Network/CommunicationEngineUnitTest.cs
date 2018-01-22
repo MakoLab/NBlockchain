@@ -7,7 +7,7 @@ using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest
+namespace NBlockchain.P2PPrototocol.lUnitTest.Network
 {
 
   [TestClass]

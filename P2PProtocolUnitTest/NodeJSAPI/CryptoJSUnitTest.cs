@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest
+namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
 {
   [TestClass]
   public class CryptoJSUnitTest

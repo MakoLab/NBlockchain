@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NBlockchain.P2PPrototocol.Repository;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest
+namespace NBlockchain.P2PPrototocol.lUnitTest.Repository
 {
   [TestClass]
   public class BlockchainStoreUnitTest

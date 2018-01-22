@@ -6,7 +6,7 @@ using NBlockchain.P2PPrototocol.NodeJSAPI;
 namespace NBlockchain.P2PPrototocol.lUnitTest.Repository
 {
   [TestClass]
-  public class UnitTest1
+  public class RepositoryUnitTest
   {
     [TestMethod]
     public void BlockTestMethod1()

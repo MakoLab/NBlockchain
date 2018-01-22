@@ -49,16 +49,18 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CryptoJSUnitTest.cs" />
+    <Compile Include="AgentAPI\PeerContractUnitTest.cs" />
+    <Compile Include="AgentAPI\DataContractUnitTest.cs" />
+    <Compile Include="NodeJSAPI\CryptoJSUnitTest.cs" />
     <Compile Include="NodeJSAPI\JSONUnitTest.cs" />
     <Compile Include="NodeJSAPI\WebSocketServerUnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ExpressUnitTest.cs" />
-    <Compile Include="AgentServicesUnitTest.cs" />
-    <Compile Include="BlockchainStoreUnitTest.cs" />
-    <Compile Include="CommunicationEngineUnitTest.cs" />
+    <Compile Include="NodeJSAPI\ExpressUnitTest.cs" />
+    <Compile Include="AgentAPI\AgentServicesUnitTest.cs" />
+    <Compile Include="Repository\BlockchainStoreUnitTest.cs" />
+    <Compile Include="Network\CommunicationEngineUnitTest.cs" />
     <Compile Include="NodeJSAPI\WebSocketClientUnitTest.cs" />
-    <Compile Include="Repository\UnitTest1.cs" />
+    <Compile Include="Repository\RepositoryUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -7,7 +7,7 @@ using NBlockchain.P2PPrototocol.Repository;
 
 namespace NBlockchain.P2PPrototocol.AgentAPI
 {
-  internal class AgentServices: IDisposable
+  internal class AgentServices : IDisposable
   {
 
     #region composition
@@ -29,7 +29,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
       m_HttpServer.get("/blocks", (req, res) => res.send(Repository.stringify()));
       m_HttpServer.post("/mineBlock", (req, res) =>
         {
-          IBlock newBlock = Repository.generateNextBlock(req.body.data);
+          IBlock newBlock = Repository.generateNextBlock(DataContract.Parse(req.body).data);
           //broadcast(responseLatestMsg());
           Log($"block added: {newBlock.stringify()}");
           res.send();
@@ -40,7 +40,7 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
         });
       m_HttpServer.post("/addPeer", (req, res) =>
         {
-          Network.connectToPeers(req.body.peer);
+          Network.connectToPeers(new Uri[] {PeerContract.Parse(req.body).PeerUri });
           res.send();
         });
       Task m_HTTPServerTask = m_HttpServer.Listen(() => Log($"Listening http on port: { http_port}"));

@@ -23,7 +23,7 @@ namespace NBlockchain.P2PPrototocol
     }
     #endregion
 
-    internal Action<string> Log { get; set; } = message => { };
+    public Action<string> Log { private get; set; } = message => { };
     /// <summary>
     /// Run the communication machine
     /// </summary>

@@ -8,7 +8,7 @@ using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest
+namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
 {
 
   [TestClass]
@@ -43,7 +43,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest
           _client.BaseAddress = new Uri("http://localhost:3001");
           HttpResponseMessage _message = _client.GetAsync("/wrong").Result;
           Assert.IsNotNull(_message);
-          Assert.AreEqual<HttpStatusCode>(HttpStatusCode.NotFound, _message.StatusCode);
+          Assert.AreEqual<HttpStatusCode>(HttpStatusCode.BadRequest, _message.StatusCode);
         }
       }
       Assert.AreEqual<int>(1, _log.Count);
