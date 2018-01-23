@@ -37,23 +37,25 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     }
     private class ServerWebSocketConnection : WebSocketConnection
     {
-      public ServerWebSocketConnection(WebSocket ws, IPEndPoint remoteEndPoint)
+      public ServerWebSocketConnection(WebSocket webSocket, IPEndPoint remoteEndPoint)
       {
+        m_WebSocket = webSocket;
         m_remoteEndPoint = remoteEndPoint;
-        Task.Factory.StartNew(() => ServerMessageLoop(ws));
+        Task.Factory.StartNew(() => ServerMessageLoop(webSocket));
       }
 
       #region WebSocketConnection
-
       protected override Task SendTask(string message)
       {
         return m_WebSocket.SendAsync(message.GetArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);
       }
       #endregion
+
       public override string ToString()
       {
         return m_remoteEndPoint.ToString();
       }
+
       private WebSocket m_WebSocket = null;
       private IPEndPoint m_remoteEndPoint;
       private void ServerMessageLoop(WebSocket ws)

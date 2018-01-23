@@ -10,7 +10,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     public virtual Action<string> onMessage { set; protected get; } = x => { };
     public virtual Action onClose { set; protected get; } = () => { };
     public virtual Action onError { set; protected get; } = () => { };
-    internal async Task send(string message)
+    internal async Task SendAsync(string message)
     {
       await SendTask(message);
     }

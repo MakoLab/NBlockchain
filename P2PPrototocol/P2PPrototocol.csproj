@@ -12,8 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bin\**" />
     <Compile Remove="Repository\obj\**" />
+    <EmbeddedResource Remove="bin\**" />
     <EmbeddedResource Remove="Repository\obj\**" />
+    <None Remove="bin\**" />
     <None Remove="Repository\obj\**" />
   </ItemGroup>
 

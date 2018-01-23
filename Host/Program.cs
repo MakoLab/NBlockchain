@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using NBlockchain.P2PPrototocol;
 
 namespace NBlockchain.Host
@@ -26,7 +27,7 @@ namespace NBlockchain.Host
       using (Bootstrap _newNode = new Bootstrap())
       {
         _newNode.Log = message => Console.WriteLine(message);
-        _newNode.Run(_p2pWSPortNumber, _AgentHTTPServerPortNumber);
+        Task _mainParallelTask = _newNode.Run(_p2pWSPortNumber, _AgentHTTPServerPortNumber);
         Console.ReadLine();
       }
     }

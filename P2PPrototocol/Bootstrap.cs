@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Threading.Tasks;
 using NBlockchain.P2PPrototocol.AgentAPI;
 using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.Repository;
@@ -29,12 +30,19 @@ namespace NBlockchain.P2PPrototocol
     /// <summary>
     /// Run the communication machine
     /// </summary>
-    public void Run(int p2pPortNumber, int _AgentHTTPServerPortNumber)
+    public async Task Run(int p2pPortNumber, int _AgentHTTPServerPortNumber)
     {
-      m_BlockchainStore = new BlockchainStore(Log);
-      m_CommunicationEngine = new CommunicationEngine(m_BlockchainStore, p2pPortNumber, Log);
-      m_Agent = new AgentAPI.AgentServices(m_BlockchainStore, m_CommunicationEngine, _AgentHTTPServerPortNumber, Log);
-      m_CommunicationEngine.initP2PServer();
+      try
+      {
+        m_BlockchainStore = new BlockchainStore(Log);
+        m_CommunicationEngine = new CommunicationEngine(m_BlockchainStore, p2pPortNumber, Log);
+        m_Agent = new AgentAPI.AgentServices(m_BlockchainStore, m_CommunicationEngine, _AgentHTTPServerPortNumber, Log);
+        await m_CommunicationEngine.InitP2PServerAsync();
+      }
+      catch (Exception ex)
+      {
+        Log($"The aplikcation has been handled by the exception {ex}");
+      }
     }
 
     private BlockchainStore m_BlockchainStore;

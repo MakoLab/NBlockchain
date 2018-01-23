@@ -19,13 +19,13 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
     #region API
     public AgentServices(IRepositoryAgentInterface repository, INetworkAgentAPI network, int _AgentHTTPServerPortNumber, Action<string> log)
     {
+      this.Log = log ?? throw new ArgumentNullException(nameof(log));
       if (IPEndPoint.MaxPort > _AgentHTTPServerPortNumber && IPEndPoint.MinPort < _AgentHTTPServerPortNumber)
         this.AgentHTTPServerPortNumber = _AgentHTTPServerPortNumber;
       else
         Log($"Wrong port number {_AgentHTTPServerPortNumber}; communication will be started using default port number");
       this.Repository = repository;
       this.Network = network;
-      this.Log = log;
       initHttpServer();
     }
     internal void initHttpServer()
@@ -47,7 +47,16 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
         });
       m_HttpServer.post("/addPeer", (req, res) =>
         {
-          Network.connectToPeers(new Uri[] {PeerContract.Parse(req.body).PeerUri });
+          try
+          {
+            Uri _peer = PeerContract.Parse(req.body).PeerUri;
+            Log($"Adding peer {_peer}");
+            Network.connectToPeers(new Uri[] { _peer });
+          }
+          catch (Exception _ex )
+          {
+            Log($"Cannot add peer because of exception {_ex}");
+          }
           res.send();
         });
       Task m_HTTPServerTask = m_HttpServer.Listen(() => Log($"Listening http on port: { AgentHTTPServerPortNumber}"));

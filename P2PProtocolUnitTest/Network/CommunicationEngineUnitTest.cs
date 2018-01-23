@@ -21,26 +21,29 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
       TestRepositoryNetwork _repository = new TestRepositoryNetwork();
       using (CommunicationEngine _new = new CommunicationEngine(_repository, -1, x => _log.Add(x)))
       {
-        Assert.AreEqual<int>(1, _log.Count);
+        Assert.AreEqual<int>(2, _log.Count);
         Assert.IsTrue(_repository.IsCosistent);
       }
     }
     [TestMethod]
     public void ConnectToPeersTestMethod()
     {
-      bool _connected = false;
-      Task _server = WebSocketServer.Server(3001, x => _connected = true);
+
+      WebSocketConnection _connection = null;
+      Task _server = WebSocketServer.Server(3001, x => _connection = x);
       List<string> _log = new List<string>();
       TestRepositoryNetwork _repository = new TestRepositoryNetwork();
       using (CommunicationEngine _new = new CommunicationEngine(_repository, -1, x => _log.Add(x)))
       {
-        Assert.AreEqual<int>(1, _log.Count);
+        Assert.AreEqual<int>(2, _log.Count);
         Assert.IsTrue(_repository.IsCosistent);
         Uri[] _peers = new Uri[] { new Uri("ws://localhost:3001") };
         _new.connectToPeers(_peers);
+        Assert.IsNotNull(_connection);
+        string _onMesage = null;
+        _connection.onMessage = x => _onMesage = x;
+        Assert.AreEqual<int>(3, _log.Count);
       }
-      Assert.IsTrue(_connected);
-      Assert.AreEqual<int>(1, _log.Count);
     }
 
     private class TestRepositoryNetwork : IRepositoryNetwork

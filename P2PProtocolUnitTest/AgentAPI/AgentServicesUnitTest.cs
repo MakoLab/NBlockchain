@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -20,7 +21,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
       List<string> _log = new List<string>();
       using (AgentServices _services = new AgentServices(new TestRepository(), new NetworkAgent(), -1, (x) => _log.Add(x)))
       {
-        Assert.AreEqual<int>(1, _log.Count);
+        Assert.AreEqual<int>(2, _log.Count);
         using (HttpClient _client = new HttpClient())
         {
           _client.BaseAddress = new Uri("http://localhost:3001");
@@ -29,15 +30,15 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
           Assert.AreEqual<HttpStatusCode>(HttpStatusCode.Accepted, _message.StatusCode);
         }
       }
-      Assert.AreEqual<int>(2, _log.Count);
+      Assert.AreEqual<int>(3, _log.Count);
     }
     [TestMethod]
     public void ServiceResponseNotFoundTestMethod()
     {
       List<string> _log = new List<string>();
-      using (AgentServices _services = new AgentServices(new TestRepository(), new NetworkAgent(), (x) => _log.Add(x)))
+      using (AgentServices _services = new AgentServices(new TestRepository(), new NetworkAgent(), -1, (x) => _log.Add(x)))
       {
-        Assert.AreEqual<int>(1, _log.Count);
+        Assert.AreEqual<int>(2, _log.Count);
         using (HttpClient _client = new HttpClient())
         {
           _client.BaseAddress = new Uri("http://localhost:3001");
@@ -46,7 +47,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
           Assert.AreEqual<HttpStatusCode>(HttpStatusCode.BadRequest, _message.StatusCode);
         }
       }
-      Assert.AreEqual<int>(1, _log.Count);
+      Assert.AreEqual<int>(2, _log.Count);
     }
     private class NetworkAgent : INetworkAgentAPI
     {

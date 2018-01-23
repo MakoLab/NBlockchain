@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace NBlockchain.P2PPrototocol.Network
 {
@@ -16,6 +17,9 @@ namespace NBlockchain.P2PPrototocol.Network
     internal MessageType type { get; set; }
     [DataMember]
     internal string data { get; set; }
+
+    internal static Message queryChainLengthMsg => new Message() { type = MessageType.QUERY_LATEST, data = String.Empty };
+    internal static Message queryAllMsg => new Message() { type = MessageType.QUERY_ALL, data = String.Empty };
 
   }
 

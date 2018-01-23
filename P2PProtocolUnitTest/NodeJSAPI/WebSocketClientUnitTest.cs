@@ -23,7 +23,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       bool _onClose = false;
       bool _onError = false;
       await Task.Delay(100);
-      await WebSocketClient.Connect(new Uri("ws://localhost:8004/ws/"), x => _connection = x, () => _onError = true);
+      await WebSocketClient.Connect(new Uri("ws://localhost:8004/ws/"), x => _connection = x, message => _onError = true);
       Assert.IsFalse(_onError);
       Assert.IsNotNull(_connection);
       _connection.onError = () => _onError = true;
@@ -45,7 +45,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       List<string> _messages = new List<string>();
       WebSocketConnection _connection = null;
       await Task.Delay(100);
-      await WebSocketClient.Connect(_clientURI, x => _connection = x, () => _onError = true);
+      await WebSocketClient.Connect(_clientURI, x => _connection = x, message => _onError = true);
       Assert.IsNotNull(_connection);
       Assert.IsFalse(_onError);
       _connection.onMessage = x => _messages.Add(x);

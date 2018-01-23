@@ -10,18 +10,18 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
   internal static class WebSocketClient
   {
 
-    internal static async Task Connect(Uri peer, Action<WebSocketConnection> onOpen, Action onError)
+    internal static async Task Connect(Uri peer, Action<WebSocketConnection> onOpen, Action<string> log)
     {
       ClientWebSocket m_ClientWebSocket = new ClientWebSocket();
       await m_ClientWebSocket.ConnectAsync(peer, CancellationToken.None);
       switch (m_ClientWebSocket.State)
       {
         case WebSocketState.Open:
-          WebSocketConnection _socket = new ClintWebSocketConnection(m_ClientWebSocket);
+          WebSocketConnection _socket = new ClintWebSocketConnection(m_ClientWebSocket, log);
           onOpen?.Invoke(_socket);
           break;
         default:
-          onError?.Invoke();
+          log?.Invoke($"Cannot connect to remote node status {m_ClientWebSocket.State}");
           break;
       }
     }
@@ -30,9 +30,10 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     private class ClintWebSocketConnection : WebSocketConnection
     {
 
-      public ClintWebSocketConnection(ClientWebSocket clientWebSocket)
+      public ClintWebSocketConnection(ClientWebSocket clientWebSocket, Action<string> log)
       {
-        m_ClientWebSocket = clientWebSocket;
+        this.m_ClientWebSocket = clientWebSocket;
+        this.m_Log = log;
         Task.Factory.StartNew(() => ClientMessageLoop());
       }
 
@@ -44,35 +45,45 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       #endregion
 
       #region private
-      private ClientWebSocket m_ClientWebSocket;
+      private ClientWebSocket m_ClientWebSocket = null;
+      private Action<string> m_Log;
       private void ClientMessageLoop()
       {
-        byte[] buffer = new byte[1024];
-        while (true)
+        try
         {
-          ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
-          WebSocketReceiveResult result = m_ClientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
-          if (result.MessageType == WebSocketMessageType.Close)
+          byte[] buffer = new byte[1024];
+          while (true)
           {
-            onClose?.Invoke();
-            m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None).Wait();
-            return;
-          }
-          int count = result.Count;
-          while (!result.EndOfMessage)
-          {
-            if (count >= buffer.Length)
+            ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
+            WebSocketReceiveResult result = m_ClientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
+            if (result.MessageType == WebSocketMessageType.Close)
             {
               onClose?.Invoke();
-              m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long", CancellationToken.None).Wait();
+              m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None).Wait();
               return;
             }
-            segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
-            result = m_ClientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
-            count += result.Count;
+            int count = result.Count;
+            while (!result.EndOfMessage)
+            {
+              if (count >= buffer.Length)
+              {
+                onClose?.Invoke();
+                m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long", CancellationToken.None).Wait();
+                return;
+              }
+              segment = new ArraySegment<byte>(buffer, count, buffer.Length - count);
+              result = m_ClientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
+              count += result.Count;
+            }
+            string _message = Encoding.UTF8.GetString(buffer, 0, count);
+            onMessage?.Invoke(_message);
           }
-          string _message = Encoding.UTF8.GetString(buffer, 0, count);
-          onMessage?.Invoke(_message);
+
+        }
+        catch (Exception _ex)
+        {
+          m_Log($"Connection has been broken because of an exception {_ex}");
+          m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Connection has been broken because of an exception", CancellationToken.None).Wait();
         }
       }
       #endregion

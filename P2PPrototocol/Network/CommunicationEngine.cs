@@ -32,10 +32,10 @@ namespace NBlockchain.P2PPrototocol.Network
       connectToPeers(initialPeers);
       Log("CommunicationEngine has been started");
     }
-    public void initP2PServer()
+    public async Task InitP2PServerAsync()
     {
-      Task _servrer = WebSocketServer.Server(WebSocketP2pPort, async _ws => await initConnection(_ws));
       Log($"listening websocket p2p port on: {WebSocketP2pPort}");
+      await WebSocketServer.Server(WebSocketP2pPort, async _ws => await InitConnectionAsync(_ws));
     }
     #endregion
 
@@ -48,18 +48,18 @@ namespace NBlockchain.P2PPrototocol.Network
     {
       List<Task> _connectionJobs = new List<Task>();
       foreach (Uri peer in newPeers)
-        _connectionJobs.Add(WebSocketClient.Connect(peer, async ws => await initConnection(ws), () => Log("connection failed")));
+        _connectionJobs.Add(WebSocketClient.Connect(peer, async ws => await InitConnectionAsync(ws), Log));
       Task.WaitAll(_connectionJobs.ToArray());
     }
     #endregion
 
     #region private
-    private async Task initConnection(WebSocketConnection ws)
+    private async Task InitConnectionAsync(WebSocketConnection ws)
     {
       sockets.Add(ws);
       initMessageHandler(ws);
       initErrorHandler(ws);
-      await write(ws, queryChainLengthMsg());
+      await WriteAsync(ws, Message.queryChainLengthMsg);
     }
     private void initMessageHandler(WebSocketConnection ws)
     {
@@ -70,13 +70,13 @@ namespace NBlockchain.P2PPrototocol.Network
         switch (message.type)
         {
           case MessageType.QUERY_LATEST:
-            await write(ws, responseLatestMsg());
+            await WriteAsync(ws, responseLatestMsg());
             break;
           case MessageType.QUERY_ALL:
-            await write(ws, responseChainMsg());
+            await WriteAsync(ws, responseChainMsg());
             break;
           case MessageType.RESPONSE_BLOCKCHAIN:
-            m_Repository.handleBlockchainResponse(message.data, () => broadcast(queryAllMsg()));
+            m_Repository.handleBlockchainResponse(message.data, () => broadcast(responseChainMsg()));
             break;
         };
       };
@@ -91,14 +91,7 @@ namespace NBlockchain.P2PPrototocol.Network
       Log($"connection failed to peer: {_ws.ToString()}");
       sockets.Remove(_ws);
     }
-    private Message queryChainLengthMsg()
-    {
-      return new Message() { type = MessageType.QUERY_LATEST };
-    }
-    private Message queryAllMsg()
-    {
-      return new Message() { type = MessageType.QUERY_ALL };
-    }
+
     private Message responseChainMsg()
     {
       return new Message()
@@ -115,12 +108,17 @@ namespace NBlockchain.P2PPrototocol.Network
         data = m_Repository.getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
       };
     }
-    private async Task write(WebSocketConnection ws, Message message) { await ws.send(message.Stringify<Message>()); }
+    private async Task WriteAsync(WebSocketConnection ws, Message message)
+    {
+      string _messageAsString = message.Stringify<Message>();
+      Log($"Writing message {_messageAsString}");
+      await ws.SendAsync(_messageAsString);
+    }
     private void broadcast(Message message)
     {
       List<Task> _jobs = new List<Task>();
       foreach (var socket in sockets)
-        _jobs.Add(write(socket, message));
+        _jobs.Add(WriteAsync(socket, message));
       Task.WaitAll(_jobs.ToArray());
     }
     private void CommunicationEngine_Broadcast(object sender, NewBlockEventArgs e)
@@ -128,7 +126,7 @@ namespace NBlockchain.P2PPrototocol.Network
       Message _newMessage = new Message()
       {
         type = MessageType.RESPONSE_BLOCKCHAIN,
-        data = e.Block.stringify() // JSON.stringify(getLatestBlock())
+        data = e.Block.stringify() // JSON.stringify(getLatestBlock()
       };
       broadcast(_newMessage);
     }
