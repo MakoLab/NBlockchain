@@ -91,7 +91,6 @@ namespace NBlockchain.P2PPrototocol.Network
       Log($"connection failed to peer: {_ws.ToString()}");
       sockets.Remove(_ws);
     }
-
     private Message responseChainMsg()
     {
       return new Message()
@@ -105,7 +104,7 @@ namespace NBlockchain.P2PPrototocol.Network
       return new Message()
       {
         type = MessageType.RESPONSE_BLOCKCHAIN,
-        data = m_Repository.getLatestBlock().stringify() // JSON.stringify(getLatestBlock())
+        data = m_Repository.getLatestBlock()
       };
     }
     private async Task WriteAsync(WebSocketConnection ws, Message message)

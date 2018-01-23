@@ -9,9 +9,7 @@ namespace NBlockchain.P2PPrototocol.Repository
 
     event EventHandler<NewBlockEventArgs> Broadcast;
     int Count { get; }
-    IBlock getLatestBlock();
-    void Add(IBlock latestBlockReceived);
-    bool isValidChain(IEnumerable<IBlock> newBlocks);
+    string getLatestBlock();
     string stringify();
     void handleBlockchainResponse(string data, Action queryAll);
 
