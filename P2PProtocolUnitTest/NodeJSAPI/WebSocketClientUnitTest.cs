@@ -21,11 +21,12 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       Task _server = RunWebSocketServerWriter(_serverURI);
       WebSocketConnection _connection = null;
       bool _onClose = false;
-      bool _onError = false;
+      List<string> _Log = new List<string>();
       await Task.Delay(100);
-      await WebSocketClient.Connect(new Uri("ws://localhost:8004/ws/"), x => _connection = x, message => _onError = true);
-      Assert.IsFalse(_onError);
+      await WebSocketClient.Connect(new Uri("ws://localhost:8004/ws/"), x => _connection = x, message => _Log.Add(message));
+      Assert.AreEqual<int>(1, _Log.Count);
       Assert.IsNotNull(_connection);
+      bool _onError = false;
       _connection.onError = () => _onError = true;
       _connection.onClose = () => _onClose = true;
       await Task.Delay(200);
@@ -33,6 +34,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       await Task.Delay(100);
       Assert.IsTrue(_server.IsCompleted);
       Assert.AreEqual<TaskStatus>( TaskStatus.RanToCompletion, _server.Status);
+      Assert.IsFalse(_onError);
     }
     [TestMethod]
     public async Task ClientReadingTestMethod()
@@ -40,23 +42,24 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
       Uri _serverURI = new Uri("http://localhost:8003/ws/");
       Uri _clientURI = new Uri("ws://localhost:8003/ws/");
       Task _server = RunWebSocketServerWriter(_serverURI);
-      bool _onError = false;
       bool _onClose = false;
       List<string> _messages = new List<string>();
       WebSocketConnection _connection = null;
       await Task.Delay(100);
-      await WebSocketClient.Connect(_clientURI, x => _connection = x, message => _onError = true);
+      await WebSocketClient.Connect(_clientURI, x => _connection = x, message => _messages.Add(message));
       Assert.IsNotNull(_connection);
-      Assert.IsFalse(_onError);
       _connection.onMessage = x => _messages.Add(x);
+      bool _onError = false;
       _connection.onError = () => _onError = true;
       _connection.onClose = () => _onClose = true;
       await Task.Delay(200);
-      Assert.AreEqual<int>(10, _messages.Count);
+      Assert.AreEqual<int>(11, _messages.Count);
       Assert.IsTrue(_onClose);
       await Task.Delay(100);
       Assert.IsTrue(_server.IsCompleted);
       Assert.AreEqual<TaskStatus>(TaskStatus.RanToCompletion, _server.Status);
+      Assert.IsFalse(_onError);
+      Assert.AreEqual<int>(11, _messages.Count);
     }
 
     #region instrumentation

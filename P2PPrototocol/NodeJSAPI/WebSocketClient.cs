@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace NBlockchain.P2PPrototocol.NodeJSAPI
 {
+
   internal static class WebSocketClient
   {
 
@@ -17,7 +18,8 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       switch (m_ClientWebSocket.State)
       {
         case WebSocketState.Open:
-          WebSocketConnection _socket = new ClintWebSocketConnection(m_ClientWebSocket, log);
+          log($"Opening WebSocket connection to remote server {peer}");
+          WebSocketConnection _socket = new ClintWebSocketConnection(m_ClientWebSocket, peer, log);
           onOpen?.Invoke(_socket);
           break;
         default:
@@ -30,9 +32,10 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     private class ClintWebSocketConnection : WebSocketConnection
     {
 
-      public ClintWebSocketConnection(ClientWebSocket clientWebSocket, Action<string> log)
+      public ClintWebSocketConnection(ClientWebSocket clientWebSocket, Uri peer, Action<string> log)
       {
         this.m_ClientWebSocket = clientWebSocket;
+        this.m_Peer = peer;
         this.m_Log = log;
         Task.Factory.StartNew(() => ClientMessageLoop());
       }
@@ -44,8 +47,16 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       }
       #endregion
 
+      #region Object
+      public override string ToString()
+      {
+        return m_Peer.ToString();
+      }
+      #endregion
+
       #region private
       private ClientWebSocket m_ClientWebSocket = null;
+      private Uri m_Peer = null;
       private Action<string> m_Log;
       private void ClientMessageLoop()
       {

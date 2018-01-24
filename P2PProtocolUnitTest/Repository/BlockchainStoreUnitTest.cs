@@ -1,7 +1,6 @@
 ﻿
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 
 namespace NBlockchain.P2PPrototocol.lUnitTest.Repository

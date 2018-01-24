@@ -42,12 +42,12 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
         _new.connectToPeers(_peers);
         await Task.Delay(200);
         Assert.IsNotNull(_connection);
-        Assert.AreEqual<int>(4, _log.Count);
+        Assert.AreEqual<int>(5, _log.Count);
         Message _requestLast = new Message() { data = string.Empty, type = Message.MessageType.QUERY_LATEST };
         await _connection.SendAsync(_requestLast.Stringify<Message>());
         await Task.Delay(200);
-        Assert.AreEqual<int>(7, _log.Count);
-        Assert.IsTrue(_log[6].Contains("received message by test"));
+        Assert.AreEqual<int>(8, _log.Count);
+        Assert.IsTrue(_log[7].Contains("received message by test"));
       }
       foreach (string _message in _log)
         Debug.WriteLine(_message);
