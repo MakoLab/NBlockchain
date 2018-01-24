@@ -58,7 +58,7 @@ namespace NBlockchain.P2PPrototocol.Repository
     }
     public string stringify()
     {
-      return this.Stringify<Block>();
+      return $"[{this.Stringify<Block>()}]";
     }
     #endregion
 
