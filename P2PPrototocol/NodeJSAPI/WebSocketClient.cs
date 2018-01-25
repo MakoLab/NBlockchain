@@ -45,6 +45,10 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       {
         return m_ClientWebSocket.SendAsync(message.GetArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None); ;
       }
+      internal override Task DisconnectAsync()
+      {
+        return m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
+      }
       #endregion
 
       #region Object
@@ -97,6 +101,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
           m_ClientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Connection has been broken because of an exception", CancellationToken.None).Wait();
         }
       }
+
       #endregion
 
     }

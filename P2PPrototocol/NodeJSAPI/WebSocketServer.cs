@@ -37,6 +37,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
     }
     private class ServerWebSocketConnection : WebSocketConnection
     {
+
       public ServerWebSocketConnection(WebSocket webSocket, IPEndPoint remoteEndPoint)
       {
         m_WebSocket = webSocket;
@@ -49,12 +50,18 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       {
         return m_WebSocket.SendAsync(message.GetArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);
       }
+      internal override Task DisconnectAsync()
+      {
+        return m_WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
+      }
       #endregion
 
+      #region Object
       public override string ToString()
       {
         return m_remoteEndPoint.ToString();
       }
+      #endregion
 
       private WebSocket m_WebSocket = null;
       private IPEndPoint m_remoteEndPoint;
@@ -88,6 +95,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
           onMessage?.Invoke(_message);
         }
       }
+
     }
   }
 }

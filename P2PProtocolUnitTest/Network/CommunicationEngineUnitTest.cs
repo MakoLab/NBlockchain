@@ -39,7 +39,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
         Assert.AreEqual<int>(2, _log.Count);
         Assert.IsTrue(_repository.IsCosistent);
         Uri[] _peers = new Uri[] { new Uri("ws://localhost:3001") };
-        _new.connectToPeers(_peers);
+        _new.ConnectToPeers(_peers);
         await Task.Delay(200);
         Assert.IsNotNull(_connection);
         Assert.AreEqual<int>(5, _log.Count);

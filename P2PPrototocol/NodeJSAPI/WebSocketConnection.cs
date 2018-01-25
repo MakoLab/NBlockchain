@@ -15,6 +15,7 @@ namespace NBlockchain.P2PPrototocol.NodeJSAPI
       await SendTask(message);
     }
     protected abstract Task SendTask(string message);
+    internal abstract Task DisconnectAsync();
 
   }
 }

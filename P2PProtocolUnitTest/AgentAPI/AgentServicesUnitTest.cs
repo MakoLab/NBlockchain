@@ -8,6 +8,8 @@ using NBlockchain.P2PPrototocol.AgentAPI;
 using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
+using System.Linq;
+using System.Collections;
 
 namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
 {
@@ -51,9 +53,9 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
     }
     private class NetworkAgent : INetworkAgentAPI
     {
-      public List<WebSocketConnection> sockets => new List<WebSocketConnection>();
 
-      public void connectToPeers(Uri[] peer)
+      public IEnumerable<string> Sockets { get { return Enumerable.Empty<string>(); } }
+      public void ConnectToPeers(Uri[] peer)
       {
         throw new NotImplementedException();
       }
@@ -61,9 +63,11 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
       {
         throw new NotImplementedException();
       }
+
     }
     private class TestRepository : IRepositoryAgentInterface
     {
+
       public IBlock generateNextBlock(string data)
       {
         throw new NotImplementedException();
@@ -72,6 +76,7 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
       {
         throw new NotImplementedException();
       }
+
     }
 
   }

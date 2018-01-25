@@ -41,19 +41,16 @@ namespace NBlockchain.P2PPrototocol.AgentAPI
           Log($"block added: {_newBlock.stringify()}");
           res.send();
         });
-      m_HttpServer.get("/peers", (req, res) =>
-        {
-          res.send(Network.sockets.map(s => s.ToString()));
-        });
+      m_HttpServer.get("/peers", (req, res) => { res.send(String.Join(", ", Network.Sockets)); });
       m_HttpServer.post("/addPeer", (req, res) =>
         {
           try
           {
             Uri _peer = PeerContract.Parse(req.body).PeerUri;
             Log($"Adding peer {_peer}");
-            Network.connectToPeers(new Uri[] { _peer });
+            Network.ConnectToPeers(new Uri[] { _peer });
           }
-          catch (Exception _ex )
+          catch (Exception _ex)
           {
             Log($"Cannot add peer because of exception {_ex}");
           }
