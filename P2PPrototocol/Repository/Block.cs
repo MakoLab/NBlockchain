@@ -111,7 +111,6 @@ namespace NBlockchain.P2PPrototocol.Repository
     {
       return index.CompareTo(other.index);
     }
-
     #endregion
 
   }

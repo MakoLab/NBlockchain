@@ -1,17 +1,15 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NBlockchain.P2PPrototocol.AgentAPI;
 using NBlockchain.P2PPrototocol.Network;
-using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
-using System.Linq;
-using System.Collections;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
+namespace NBlockchain.P2PPrototocol.UnitTest.AgentAPI
 {
 
   [TestClass]

@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 
 namespace NBlockchain.P2PPrototocol.Repository
@@ -11,7 +10,7 @@ namespace NBlockchain.P2PPrototocol.Repository
 
     internal BlockchainStore(Action<string> log)
     {
-      blockchain.Add(GenesisBlock);
+      m_Blockchain.Add(GenesisBlock);
       Log = log;
     }
     internal Action<string> Log { get; set; }
@@ -19,13 +18,13 @@ namespace NBlockchain.P2PPrototocol.Repository
     #region IRepositoryAgentInterface
     public string stringify()
     {
-      return blockchain.Stringify<List<Block>>();
+      return m_Blockchain.Stringify<List<Block>>();
     }
     public IBlock generateNextBlock(string blockData)
     {
-      Block previousBlock = blockchain[blockchain.Count - 1];
+      Block previousBlock = m_Blockchain[m_Blockchain.Count - 1];
       Block newBlock = new Block(previousBlock, blockData);
-      blockchain.Add(newBlock);
+      m_Blockchain.Add(newBlock);
       Broadcast?.Invoke(this, new NewBlockEventArgs(newBlock));
       return newBlock;
     }
@@ -33,28 +32,27 @@ namespace NBlockchain.P2PPrototocol.Repository
 
     #region IRepositoryNetwork
     public event EventHandler<NewBlockEventArgs> Broadcast;
-    public int Count { get { return blockchain.Count; } }
     public string getLatestBlock()
     {
-      List<Block> _lastBlockToSerialize = new List<Block>() { blockchain[blockchain.Count - 1] };
+      List<Block> _lastBlockToSerialize = new List<Block>() { m_Blockchain[m_Blockchain.Count - 1] };
       return _lastBlockToSerialize.Stringify<List<Block>>();
     }
     public void handleBlockchainResponse(string data, Action queryAll)
     {
-      List<Block> receivedBlocks = data.Parse<List<Block>>(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
-      receivedBlocks.Sort();
-      Block latestBlockReceived = receivedBlocks[receivedBlocks.Count - 1];
-      IBlock latestBlockHeld = blockchain[blockchain.Count - 1];
-      if (latestBlockReceived.index > latestBlockHeld.index)
+      List<Block> _receivedBlocks = data.Parse<List<Block>>(); // JSON.parse(message.data).sort((b1, b2) => (b1.index - b2.index));
+      _receivedBlocks.Sort();
+      Block _latestBlockReceived = _receivedBlocks[_receivedBlocks.Count - 1];
+      Block _latestBlockHeld = m_Blockchain[m_Blockchain.Count - 1];
+      if (_latestBlockReceived.index > _latestBlockHeld.index)
       {
-        Log($"blockchain possibly behind. We got: {latestBlockHeld.index} Peer got: {latestBlockReceived.index}");
-        if (latestBlockHeld.hash == latestBlockReceived.previousHash)
+        Log($"blockchain possibly behind. We got: {_latestBlockHeld.index} Peer got: {_latestBlockReceived.index}");
+        if (_latestBlockHeld.hash == _latestBlockReceived.previousHash)
         {
           Log("We can append the received block to our chain");
-          blockchain.Add(latestBlockReceived);
-          Broadcast?.Invoke(this, new NewBlockEventArgs(blockchain[blockchain.Count - 1]));
+          m_Blockchain.Add(_latestBlockReceived);
+          Broadcast?.Invoke(this, new NewBlockEventArgs(m_Blockchain[m_Blockchain.Count - 1]));
         }
-        else if (receivedBlocks.Count == 1)
+        else if (_receivedBlocks.Count == 1)
         {
           Log("We have to query the chain from our peer");
           queryAll();
@@ -62,7 +60,7 @@ namespace NBlockchain.P2PPrototocol.Repository
         else
         {
           Log("Received blockchain is longer than current blockchain");
-          replaceChain(receivedBlocks);
+          ReplaceChain(_receivedBlocks);
         }
       }
       else
@@ -71,29 +69,28 @@ namespace NBlockchain.P2PPrototocol.Repository
     #endregion
 
     #region private
-    private List<Block> blockchain { get; set; } = new List<Block>();
+    private List<Block> m_Blockchain { get; set; } = new List<Block>();
     private static Block GenesisBlock => new Block(0, "0", 1465154705, "my genesis block!!", "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7");
-    private void replaceChain(List<Block> newBlocks)
+    private void ReplaceChain(List<Block> newBlocks)
     {
-      if (isValidChain(newBlocks) && newBlocks.Count > Count)
+      if (IsValidChain(newBlocks) && newBlocks.Count > m_Blockchain.Count)
       {
         Log("Received blockchain is valid. Replacing current blockchain with received blockchain");
-        blockchain = newBlocks;
-        Broadcast?.Invoke(this, new NewBlockEventArgs(blockchain[blockchain.Count - 1]));
+        m_Blockchain = newBlocks;
+        Broadcast?.Invoke(this, new NewBlockEventArgs(m_Blockchain[m_Blockchain.Count - 1]));
       }
       else
-        Log("Received blockchain invalid");
+        Log("Received invalid blockchain ");
     }
-    private bool isValidChain(IEnumerable<IBlock> blockchainToValidate)
+    private bool IsValidChain(List<Block> blockchainToValidate)
     {
-      List<Block> _blockchainToValidate = blockchainToValidate.Cast<Block>().ToList<Block>();
-      if (_blockchainToValidate[0] != GenesisBlock)
+      if (blockchainToValidate[0] != GenesisBlock)
         return false;
-      List<Block> tempBlocks = new List<Block>() { _blockchainToValidate[0] };
-      for (int i = 1; i < _blockchainToValidate.Count; i++)
+      List<Block> _tempBlocks = new List<Block>() { blockchainToValidate[0] };
+      for (int i = 1; i < blockchainToValidate.Count; i++)
       {
-        if (Block.isValidNewBlock(_blockchainToValidate[i], tempBlocks[i - 1]))
-          tempBlocks.Add(_blockchainToValidate[i]);
+        if (Block.isValidNewBlock(blockchainToValidate[i], _tempBlocks[i - 1]))
+          _tempBlocks.Add(blockchainToValidate[i]);
         else
           return false;
       }

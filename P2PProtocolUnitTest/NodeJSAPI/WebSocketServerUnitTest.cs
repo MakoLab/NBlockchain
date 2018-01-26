@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest.NodeJSAPI
+namespace NBlockchain.P2PPrototocol.UnitTest.NodeJSAPI
 {
   [TestClass]
   public class WebSocketServerUnitTest

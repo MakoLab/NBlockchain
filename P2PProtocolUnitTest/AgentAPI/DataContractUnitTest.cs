@@ -1,7 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NBlockchain.P2PPrototocol.AgentAPI;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest.AgentAPI
+namespace NBlockchain.P2PPrototocol.UnitTest.AgentAPI
 {
   [TestClass]
   public class DataContractUnitTest

@@ -7,8 +7,8 @@
     <ProjectGuid>{E715A33C-AB2B-46D6-85FC-0B14E1089456}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NBlockchain.P2PPrototocol.lUnitTest</RootNamespace>
-    <AssemblyName>NBlockchain.P2PPrototocol.lUnitTest</AssemblyName>
+    <RootNamespace>NBlockchain.P2PPrototocol.UnitTest</RootNamespace>
+    <AssemblyName>NBlockchain.P2PPrototocol.UnitTest</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -60,6 +60,7 @@
     <Compile Include="Repository\BlockchainStoreUnitTest.cs" />
     <Compile Include="Network\CommunicationEngineUnitTest.cs" />
     <Compile Include="NodeJSAPI\WebSocketClientUnitTest.cs" />
+    <Compile Include="Repository\BlockUnitTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

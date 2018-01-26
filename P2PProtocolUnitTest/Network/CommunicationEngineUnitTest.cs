@@ -8,7 +8,7 @@ using NBlockchain.P2PPrototocol.Network;
 using NBlockchain.P2PPrototocol.NodeJSAPI;
 using NBlockchain.P2PPrototocol.Repository;
 
-namespace NBlockchain.P2PPrototocol.lUnitTest.Network
+namespace NBlockchain.P2PPrototocol.UnitTest.Network
 {
 
   [TestClass]
@@ -45,11 +45,11 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
         Assert.AreEqual<int>(5, _log.Count);
         Message _requestLast = new Message() { data = string.Empty, type = Message.MessageType.QUERY_LATEST };
         await _connection.SendAsync(_requestLast.Stringify<Message>());
-        await Task.Delay(200);
+        await Task.Delay(300);
         Assert.AreEqual<int>(8, _log.Count);
         Assert.IsTrue(_log[7].Contains("received message by test"));
       }
-      foreach (string _message in _log)
+      foreach (string _message in _log.ToArray())
         Debug.WriteLine(_message);
     }
     private class TestRepositoryNetwork : IRepositoryNetwork
@@ -58,7 +58,6 @@ namespace NBlockchain.P2PPrototocol.lUnitTest.Network
       internal bool IsCosistent { get { return Broadcast != null; } }
 
       #region IRepositoryNetwork
-      public int Count => throw new NotImplementedException();
       public event EventHandler<NewBlockEventArgs> Broadcast;
       public string getLatestBlock()
       {

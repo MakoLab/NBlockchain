@@ -1,4 +1,4 @@
 ﻿
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleToAttribute("NBlockchain.P2PPrototocol.lUnitTest")]
+[assembly: InternalsVisibleToAttribute("NBlockchain.P2PPrototocol.UnitTest")]
