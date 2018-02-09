@@ -4,6 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>NBlockchain.P2PPrototocol</AssemblyName>
     <RootNamespace>NBlockchain.P2PPrototocol</RootNamespace>
+    <Company>Makolab</Company>
+    <Authors>Mariusz Postol</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C44C0AB-3093-4EBE-92E3-078B9EE54D15}"
 	ProjectSection(SolutionItems) = preProject
 		..\documentation\GraphChain.js\main.js = ..\documentation\GraphChain.js\main.js
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "P2PProtocolUnitTest", "P2PProtocolUnitTest\P2PProtocolUnitTest.csproj", "{E715A33C-AB2B-46D6-85FC-0B14E1089456}"
